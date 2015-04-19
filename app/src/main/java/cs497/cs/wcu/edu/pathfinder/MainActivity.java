@@ -7,13 +7,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.io.File;
 
 
 public class MainActivity extends ActionBarActivity
@@ -32,6 +31,8 @@ public class MainActivity extends ActionBarActivity
 
     boolean dirEmpty;
 
+    String tag = "OUTBOUNDS";
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -47,31 +48,31 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        File dir = this.getApplicationContext().getFilesDir();
-        File[] filesInDir = dir.listFiles();
-        dirEmpty = filesInDir.length == 0;
+        dirEmpty = AppConstraints.isDirEmpty(this.getApplicationContext());
+
+
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position)
     {
         Fragment fragment;
-
+        Log.v(tag, "" + dirEmpty);
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (position == 0)
         {
-            if (dirEmpty)
+            /*if (dirEmpty)
             {
                 fragment = new NoFilesFragment();
                 fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
             }
             else
-            {
+            {*/
                 fragment = new FileLoadFragment();
                 fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-            }
+            //}
         }
         if (position == 1)
         {
@@ -87,7 +88,7 @@ public class MainActivity extends ActionBarActivity
         switch (number)
         {
             case 1:
-                mTitle = getString(R.string.title_section1);
+                mTitle = getString(R.string.title1_saved_routes);
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);

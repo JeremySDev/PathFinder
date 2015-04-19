@@ -1,6 +1,7 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -32,6 +33,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 
     /* The directory of the app*/
     public File dir;
+    public File routesDir;
 
 
     /* A list of text to display on our list view */
@@ -48,16 +50,21 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_file_load, container, false);
+        View rootView;
 
-        //Set the list view adapters for this view.
-        ListView lv = (ListView) rootView.findViewById(R.id.list);
+        if (!AppConstraints.isDirEmpty(this.getActivity()))
+        {
+            rootView = inflater.inflate(R.layout.fragment_file_load, container, false);
 
-        //this class will be the on item click listener for the list.
-        lv.setOnItemClickListener(this);
+            //Set the list view adapters for this view.
+            ListView listView = (ListView) rootView.findViewById(R.id.list);
 
-        //Creating an internal dir;
-        dir = this.getActivity().getFilesDir();
+            //this class will be the on item click listener for the list.
+            listView.setOnItemClickListener(this);
+
+            //Creating an internal dir;
+            dir = this.getActivity().getFilesDir();
+            routesDir = this.getActivity().getDir(dir.getAbsolutePath() + "routes", Context.MODE_PRIVATE);
 /*
         File files = new File(dir, "MyRoute-Today-40mi.xml");
         PrintWriter writer;
@@ -75,26 +82,33 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         }*/
 
 
-        //Get the files in the directory
-        filelist = this.dir.listFiles();
-        String[] fileNameArray;
-        //get all the names of files and add them to the theNamesOfFiles array
-        for (File file : filelist)
-        {
-            fileNameArray = file.getName().split("-");
-            Log.v("FILE", Arrays.toString(fileNameArray));
-            fileNames.add(fileNameArray[0]);
-            datesOfRoutes.add(fileNameArray[1]);
-            distances.add(fileNameArray[2]);
+            //Get the files in the directory
+            filelist = this.routesDir.listFiles();
+            String[] fileNameArray;
+            //get all the names of files and add them to the theNamesOfFiles array
+            for (File file : filelist)
+            {
+                fileNameArray = file.getName().split("-");
+                Log.v("FILE", Arrays.toString(fileNameArray));
+                if (fileNameArray.length >= 2)
+                {
+                    fileNames.add(fileNameArray[0]);
+                    datesOfRoutes.add(fileNameArray[1]);
+                    distances.add(fileNameArray[2]);
+                }
+            }
+
+            //Instantiate the custom adapter and pass to it the layout to be displayed
+            ArrayAdapter<String> adapter =
+                    new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames,
+                            datesOfRoutes, distances);
+
+            listView.setAdapter(adapter);
         }
-
-        //Instantiate the custom adapter and pass to it the layout to be displayed
-        ArrayAdapter<String> adapter =
-                new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames,
-                        datesOfRoutes, distances);
-
-        lv.setAdapter(adapter);
-
+        else
+        {
+            rootView = inflater.inflate(R.layout.fragment_no_files, container, false);
+        }
         return rootView;
     }
 

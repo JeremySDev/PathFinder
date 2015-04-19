@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Path Finder</string>
 
-    <string name="title_section1">Saved Routes</string>
+    <string name="title1_saved_routes">Saved Routes</string>
     <string name="title_section2">Route</string>
     <string name="title_section3">Section 3</string>
 
