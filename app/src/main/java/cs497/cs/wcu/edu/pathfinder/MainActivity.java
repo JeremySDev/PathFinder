@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks
@@ -47,10 +49,12 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+        //Get the applications directory
+        File dir = this.getApplicationContext().getFilesDir();
+        //make a folder in the applications directory named routes
+        boolean test = new File(dir.getName(), "routes").mkdir();
 
         dirEmpty = AppConstraints.isDirEmpty(this.getApplicationContext());
-
-
     }
 
     @Override
@@ -172,8 +176,8 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState)
         {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
+            //View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            return inflater.inflate(R.layout.fragment_main, container, false);
         }
 
         @Override
