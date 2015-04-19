@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -73,11 +74,14 @@ public class CustomListAdapter extends ArrayAdapter<String>
         String distanceText = "" + this.distances.get(position);
 
         //Get the views from the list item XML
-        //TextView handName = (TextView) v.findViewById(R.id.card_hand_name);
-        //TextView prizeAmount = (TextView) v.findViewById(R.id.card_hand_worth);
+        TextView filenameTextView = (TextView) v.findViewById(R.id.filename_text_view);
+        TextView dateTextView = (TextView) v.findViewById(R.id.date_text_view);
+        TextView distanceTextView = (TextView) v.findViewById(R.id.distance_text_view);
 
         //Set texts on views
-        //handName.setText(prizeText + "  " + itemText);
+        filenameTextView.setText(routeText);
+        dateTextView.setText(dateText);
+        distanceTextView.setText(distanceText);
 
 
         return (v);//Return the layout view populated with data.

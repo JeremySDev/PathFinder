@@ -1,8 +1,8 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -33,11 +36,11 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 
 
     /* A list of text to display on our list view */
-    private ArrayList<String> fileNames;
+    private ArrayList<String> fileNames = new ArrayList<>();
 
-    private ArrayList<String> datesOfRoutes;
+    private ArrayList<String> datesOfRoutes = new ArrayList<>();
 
-    private ArrayList<String> distances;
+    private ArrayList<String> distances = new ArrayList<>();
 
     /**
      * Called to create the fragment view.
@@ -58,7 +61,21 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         dir = this.getActivity().getFilesDir();
 
         File files = new File(dir, "MyRoute-Today-40mi.xml");
-        
+        PrintWriter writer;
+
+        //Try and write the contents of linesJSON to the file
+        try
+        {
+            writer = new PrintWriter(files, "UTF-8");
+            writer.println("Hello, World");
+            writer.close();
+        }
+        catch (FileNotFoundException | UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+
+
         //Get the files in the directory
         filelist = this.dir.listFiles();
 
@@ -67,6 +84,9 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         {
             fileNames.add(file.getName());
         }
+
+        datesOfRoutes.add("4-18-2015");
+        distances.add("40mi");
 
         //Instantiate the custom adapter and pass to it the layout to be displayed
         ArrayAdapter<String> adapter = new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames, datesOfRoutes, distances);

@@ -1,8 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:padding="10dp"
-    android:textSize="16sp"
-    android:text="test">
-</TextView>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="?android:attr/listPreferredItemHeight"
+              android:gravity="center_vertical"
+              android:orientation="horizontal"
+              android:weightSum="3"
+              android:clickable="false">
+
+    <TextView
+            android:id="@+id/filename_text_view"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:gravity="start|center_vertical"
+            android:text="MyRoute"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:layout_weight="1"/>
+
+    <TextView
+            android:id="@+id/date_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4-18-2016"
+            android:textSize="20sp"
+            android:layout_weight="1"/>
+    <TextView
+            android:id="@+id/distance_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="40mi"
+            android:textSize="20sp"
+            android:layout_weight="1"
+            android:textAlignment="center"/>
+</LinearLayout>
