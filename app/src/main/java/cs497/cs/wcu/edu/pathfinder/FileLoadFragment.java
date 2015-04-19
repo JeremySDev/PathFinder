@@ -3,6 +3,7 @@ package cs497.cs.wcu.edu.pathfinder;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * FileLoadFragment - this fragment is responsible for displaying a list view of saved files and
@@ -59,12 +58,12 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 
         //Creating an internal dir;
         dir = this.getActivity().getFilesDir();
-
+/*
         File files = new File(dir, "MyRoute-Today-40mi.xml");
         PrintWriter writer;
 
         //Try and write the contents of linesJSON to the file
-        try
+        /*try
         {
             writer = new PrintWriter(files, "UTF-8");
             writer.println("Hello, World");
@@ -73,23 +72,26 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         catch (FileNotFoundException | UnsupportedEncodingException e)
         {
             e.printStackTrace();
-        }
+        }*/
 
 
         //Get the files in the directory
         filelist = this.dir.listFiles();
-
+        String[] fileNameArray;
         //get all the names of files and add them to the theNamesOfFiles array
         for (File file : filelist)
         {
-            fileNames.add(file.getName());
+            fileNameArray = file.getName().split("-");
+            Log.v("FILE", Arrays.toString(fileNameArray));
+            fileNames.add(fileNameArray[0]);
+            datesOfRoutes.add(fileNameArray[1]);
+            distances.add(fileNameArray[2]);
         }
 
-        datesOfRoutes.add("4-18-2015");
-        distances.add("40mi");
-
         //Instantiate the custom adapter and pass to it the layout to be displayed
-        ArrayAdapter<String> adapter = new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames, datesOfRoutes, distances);
+        ArrayAdapter<String> adapter =
+                new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames,
+                        datesOfRoutes, distances);
 
         lv.setAdapter(adapter);
 
@@ -115,6 +117,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     /**
      * readFile - takes in a filename make a file from it reads it in and places its contents in
      * linesJSON
+     *
      * @param fileName
      */
     public void readFile(String fileName)

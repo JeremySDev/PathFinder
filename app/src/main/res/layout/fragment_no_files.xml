@@ -1,0 +1,16 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="cs497.cs.wcu.edu.pathfinder.NoFilesFragment">
+
+    <TextView
+            android:id="@+id/no_files_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="131dp"
+            android:text="@string/no_routes_text"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+
+</FrameLayout>

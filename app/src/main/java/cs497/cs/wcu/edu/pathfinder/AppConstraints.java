@@ -6,4 +6,5 @@ package cs497.cs.wcu.edu.pathfinder;
  */
 public class AppConstraints
 {
+
 }

@@ -43,7 +43,7 @@ public class CustomListAdapter extends ArrayAdapter<String>
 
         this.routeNames = fileNames;
         this.dates = datesOfRoutes;
-        this.distances = datesOfRoutes;
+        this.distances = distances;
 
         viewSource = textViewResourceId;
     }
@@ -70,8 +70,8 @@ public class CustomListAdapter extends ArrayAdapter<String>
         }
 
         String routeText = this.routeNames.get(position);
-        String dateText = "" + this.dates.get(position);
-        String distanceText = "" + this.distances.get(position);
+        String dateText = this.dates.get(position);
+        String distanceText = this.distances.get(position);
 
         //Get the views from the list item XML
         TextView filenameTextView = (TextView) v.findViewById(R.id.filename_text_view);

@@ -13,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks
@@ -28,6 +30,8 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
+    boolean dirEmpty;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -42,17 +46,40 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        File dir = this.getApplicationContext().getFilesDir();
+        File[] filesInDir = dir.listFiles();
+        dirEmpty = filesInDir.length == 0;
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position)
     {
-        Fragment test = new FileLoadFragment();
+        Fragment fragment;
+
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, test)
-                .commit();
+
+        if (position == 0)
+        {
+            if (dirEmpty)
+            {
+                fragment = new NoFilesFragment();
+                fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+            }
+            else
+            {
+                fragment = new FileLoadFragment();
+                fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+            }
+        }
+        if (position == 1)
+        {
+            fragment = new MyMapFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+
+        }
+
     }
 
     public void onSectionAttached(int number)
