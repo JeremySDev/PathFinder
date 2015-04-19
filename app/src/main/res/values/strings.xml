@@ -15,5 +15,12 @@
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <string name="no_routes_text">No Saved Routes</string>
+    <string name="action_record">Record Route</string>
+    <string name="action_stop">Stop Recording</string>
+    <string name="action_save">Save Route</string>
+    <string name="sample_name">MyRoute</string>
+    <string name="sample_date">4-18-2016</string>
+    <string name="sample_distance">40mi</string>
 </resources>

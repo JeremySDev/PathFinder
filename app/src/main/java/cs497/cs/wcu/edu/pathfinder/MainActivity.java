@@ -33,7 +33,7 @@ public class MainActivity extends ActionBarActivity
 
     boolean dirEmpty;
 
-    String tag = "OUTBOUNDS";
+    String tag = "IS EMPTY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -61,30 +61,21 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position)
     {
         Fragment fragment;
+        Fragment mapFragment = new MyMapFragment();
         Log.v(tag, "" + dirEmpty);
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (position == 0)
         {
-            /*if (dirEmpty)
-            {
-                fragment = new NoFilesFragment();
-                fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-            }
-            else
-            {*/
-                fragment = new FileLoadFragment();
-                fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-            //}
+            fragment = new FileLoadFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
         }
         if (position == 1)
         {
-            fragment = new MyMapFragment();
-            fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-
+            //fragment = new MyMapFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
         }
-
     }
 
     public void onSectionAttached(int number)
