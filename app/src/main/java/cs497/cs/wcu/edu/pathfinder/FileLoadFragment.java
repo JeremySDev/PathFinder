@@ -16,6 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -56,60 +59,94 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         {
             rootView = inflater.inflate(R.layout.fragment_file_load, container, false);
 
-            //Set the list view adapters for this view.
-            ListView listView = (ListView) rootView.findViewById(R.id.list);
-
-            //this class will be the on item click listener for the list.
-            listView.setOnItemClickListener(this);
+            this.listViewHelper(rootView);
 
             //Creating an internal dir;
             dir = this.getActivity().getFilesDir();
-            routesDir = this.getActivity().getDir(dir.getAbsolutePath() + "routes", Context.MODE_PRIVATE);
-/*
-        File files = new File(dir, "MyRoute-Today-40mi.xml");
-        PrintWriter writer;
+            //make a folder in the applications directory named routes
+            boolean test = new File(dir.getName(), "routes").mkdir();
+            routesDir = this.getActivity().getDir("routes", Context.MODE_PRIVATE);
 
-        //Try and write the contents of linesJSON to the file
-        /*try
-        {
-            writer = new PrintWriter(files, "UTF-8");
-            writer.println("Hello, World");
-            writer.close();
-        }
-        catch (FileNotFoundException | UnsupportedEncodingException e)
-        {
-            e.printStackTrace();
-        }*/
-
-
+            this.makeTestFiles();
             //Get the files in the directory
             filelist = this.routesDir.listFiles();
             String[] fileNameArray;
+
+            String routeName;
+            String routeDate;
+            String routeDis;
             //get all the names of files and add them to the theNamesOfFiles array
             for (File file : filelist)
             {
-                fileNameArray = file.getName().split("-");
+                fileNameArray = file.getName().split("_");
                 Log.v("FILE", Arrays.toString(fileNameArray));
                 if (fileNameArray.length >= 2)
                 {
-                    fileNames.add(fileNameArray[0]);
-                    datesOfRoutes.add(fileNameArray[1]);
-                    distances.add(fileNameArray[2]);
+                    routeName = fileNameArray[0];
+                    routeDate = fileNameArray[1];
+                    routeDis = fileNameArray[2];
+
+                    if (routeName.length() >= 10)
+                    {
+                        Log.v("FILENAME", routeName);
+                        routeName = routeName.substring(0, 7);
+                        routeName += "...";
+                        Log.v("FILENAME", routeName);
+                    }
+
+                    fileNames.add(routeName);
+                    datesOfRoutes.add(routeDate);
+                    distances.add(routeDis.substring(0, routeDis.length() - 4));
                 }
             }
 
-            //Instantiate the custom adapter and pass to it the layout to be displayed
-            ArrayAdapter<String> adapter =
-                    new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames,
-                            datesOfRoutes, distances);
-
-            listView.setAdapter(adapter);
         }
         else
         {
             rootView = inflater.inflate(R.layout.fragment_no_files, container, false);
         }
         return rootView;
+    }
+
+    private void makeTestFiles()
+    {
+
+        File file1 = new File(routesDir, "ABCDABCDABCDABCDABCDABCDABCD_4-19-2015_22mi.xml");
+        File file2 = new File(routesDir, "MyRoute2_4-20-2015_12mi.xml");
+        File file3 = new File(routesDir, "MyRoute3_4-21-2015_30mi.xml");
+        File file4 = new File(routesDir, "MyRoute4_4-22-2015_46mi.xml");
+        File file5 = new File(routesDir, "MyRoute5_4-30-2015_53mi.xml");
+        File[] files = new File[]{file1, file2, file3, file4, file5,};
+        PrintWriter writer;
+        for (File file : files)
+        {
+            try
+            {
+                writer = null;
+                writer = new PrintWriter(file, "UTF-8");
+                writer.println("Hello, World");
+                writer.close();
+            }
+            catch (FileNotFoundException | UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void listViewHelper(View rootView)
+    {
+        //Set the list view adapters for this view.
+        ListView listView = (ListView) rootView.findViewById(R.id.list);
+
+        //this class will be the on item click listener for the list.
+        listView.setOnItemClickListener(this);
+        //Instantiate the custom adapter and pass to it the layout to be displayed
+        ArrayAdapter<String> adapter =
+                new CustomListAdapter(this.getActivity(), R.layout.list_item, fileNames,
+                        datesOfRoutes, distances);
+
+        listView.setAdapter(adapter);
     }
 
     /*When an item in the list is clicked this is fired.*/
