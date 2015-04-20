@@ -1,5 +1,6 @@
 package cs497.cs.wcu.edu.pathfinder;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -18,6 +18,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.LinkedList;
 
 
 /**
@@ -27,17 +31,36 @@ import com.google.android.gms.maps.model.MarkerOptions;
  */
 public class MyMapFragment extends Fragment implements LocationProvider.LocationCallback
 {
+
+    public static final String TAG = MyMapFragment.class.getSimpleName();
+
     private SupportMapFragment fragment;
+
     private GoogleMap mMap;
 
     private LocationProvider mLocationProvider;
 
-    public static final String TAG = MyMapFragment.class.getSimpleName();
+    private LinkedList<LatLng> points = new LinkedList<>();
+    private LinkedList<Location> locations = new LinkedList<>();
 
     private Marker startPostion;
     private Marker endPostion;
+
     private MarkerOptions startPostionMarkerOptions;
     private MarkerOptions endPostionMarkerOptions;
+
+    private Polyline route;
+
+    private static int track = 0;
+
+    private boolean trackRoute = true;
+
+    private static boolean firstMarker = true;
+    private static boolean lastMarker = false;
+
+    private float routeDistance = 0.0f;
+    private Location lastLocation;
+
 
     /**
      * Does the initial creation of the fragment*
@@ -100,24 +123,8 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         {
             mMap = fragment.getMap();
         }
-        //Latitude and longitude for stillwell
-        double lat = 35.312297;
-        double lng = -83.180138;
-
-        //Latlng object for stillwell
-        LatLng location = new LatLng(lat, lng);
-
-        //Create cameraupdate object to zoom in and center on Stillwell
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(17);
-        CameraUpdate center = CameraUpdateFactory.newLatLng(location);
-
-        //Add a marker at the Latitude and longitude and title it Stillwell Building
-        mMap.addMarker(
-                new MarkerOptions().position(new LatLng(lat, lng)).title("Stillwell Building"));
-
-        //Run the camera updates on the map object.
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
+        //mMap.setMyLocationEnabled(true);
+        //mMap.getMyLocation();
     }
 
 
@@ -137,11 +144,13 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
             case R.id.action_record:
                 Toast.makeText(this.getActivity().getApplicationContext(), "Record",
                         Toast.LENGTH_SHORT).show();
+                trackRoute = true;
                 return true;
             //if the user pressed undo call the customViews undo method
             case R.id.action_stop:
                 Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
                         Toast.LENGTH_SHORT).show();
+                lastMarker = true;
                 return true;
             //if the user pressed clear call the customViews clearScreen method
             case R.id.action_save:
@@ -157,17 +166,109 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
     public void handleNewLocation(Location location)
     {
         Log.d(TAG, location.toString());
+        //Toast for when we get a new location
+        Toast.makeText(this.getActivity().getApplicationContext(), "New Location",
+                Toast.LENGTH_SHORT).show();
 
+        //Get the current Latitude and Longitude of the location
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
 
+        //the distance between the last location and current one
+        float disRecentPoints;
+
+        //Create a LatLng object from our new location
         LatLng latLng = new LatLng(currentLatitude, currentLongitude);
 
-        MarkerOptions options = new MarkerOptions()
-                .position(latLng)
-                .title("I am here!");
+        //Check if we are supposed to track the route
+        if (trackRoute)
+        {
+            //Marker for new location
+            MarkerOptions options;
 
-        mMap.addMarker(options);
+            //Add the latlng object to a the linkedlist of points
+            points.add(latLng);
+
+            //Check if its the start marker
+            if (firstMarker)
+            {
+                startPostionMarkerOptions = new MarkerOptions()
+                        .position(latLng)
+                        .title("Start  " + track);
+                mMap.addMarker(startPostionMarkerOptions);
+                firstMarker = false;
+            }
+            else if (lastMarker)
+            {
+                endPostionMarkerOptions = new MarkerOptions()
+                        .position(latLng)
+                        .title("Finish " + track);
+                mMap.addMarker(endPostionMarkerOptions);
+                trackRoute = false;
+            }
+            else
+            {
+                options = new MarkerOptions()
+                        .position(latLng)
+                        .title("I am here! " + track);
+                mMap.addMarker(options);
+                disRecentPoints = location.distanceTo(locations.getLast());
+
+                Toast.makeText(this.getActivity().getApplicationContext(), "Distance: " + disRecentPoints,
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            locations.add(location);
+            track++;
+            this.drawPolyline();
+        }
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
     }
+
+    public void drawPolyline()
+    {
+        /*points.add(new LatLng(35.303268, -83.182322));
+        points.add(new LatLng(35.310450, -83.182631));
+        points.add(new LatLng(35.311357, -83.182171));
+        points.add(new LatLng(35.310517, -83.183470));
+        points.add(new LatLng(35.311235, -83.181227));
+        points.add(new LatLng(35.313028, -83.179745));
+        points.add(new LatLng(35.311295, -83.181263));
+        points.add(new LatLng(35.305279, -83.182494));
+        points.add(new LatLng(35.310717, -83.183028));
+        points.add(new LatLng(35.307502, -83.182880));
+        points.add(new LatLng(35.311440, -83.183000));
+        points.add(new LatLng(35.309005, -83.186424));
+        points.add(new LatLng(35.306355, -83.186963));
+        points.add(new LatLng(35.310464, -83.186638));
+        points.add(new LatLng(35.307116, -83.184431));
+        points.add(new LatLng(35.309418, -83.183299));
+        points.add(new LatLng(35.310000, -83.182575));
+        points.add(new LatLng(35.311339, -83.178967));
+        points.add(new LatLng(35.301412, -83.181435));
+        points.add(new LatLng(35.309188, -83.186925));*/
+
+        PolylineOptions po = new PolylineOptions();
+        po.addAll(points);
+        po.color(Color.BLUE);
+        po.width(20.0f);
+        route = mMap.addPolyline(po);
+    }
+
+    private float routeDistance()
+    {
+        float distance = 0.0f;
+
+        for (int i = 0; i <= locations.size()-1; i++)
+        {
+            distance += (locations.get(i)).distanceTo((locations.get(i+1)));
+        }
+
+        return distance;
+    }
+
+
+
+
 }
