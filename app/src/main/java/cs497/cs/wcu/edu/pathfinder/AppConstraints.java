@@ -48,14 +48,14 @@ public class AppConstraints extends Application
     public static  final String BROADCAST_FOUR = "edu.wcu.location_broadcast_four";
     public static final LatLng CULLOWHEE = new LatLng(35.308016, -83.165131);
 
-    private static AppConstraints instance;
+    private static Context instance;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         //Maintain an instance of this for static access
-        instance = this;
+        instance = this.getApplicationContext();
     }
 
     /**
@@ -63,7 +63,7 @@ public class AppConstraints extends Application
      * @return The single instance that is maintained as a static field.
      */
     //==========================================================================
-    public static AppConstraints getInstance(){
+    public static Context getInstance(){
         return instance;
     }
 

@@ -55,7 +55,10 @@ public class MainActivity extends ActionBarActivity
         boolean test = new File(dir.getName(), "routes").mkdir();
 
         dirEmpty = AppConstraints.isDirEmpty(this.getApplicationContext());
+
     }
+
+
 
     @Override
     public void onNavigationDrawerItemSelected(int position)

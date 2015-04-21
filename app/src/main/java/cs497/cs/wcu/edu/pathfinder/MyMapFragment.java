@@ -194,14 +194,15 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
     {
 
         //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
-        LatLng location = new LatLng(lat, lng);
+        /*LatLng location = new LatLng(lat, lng);
 
         //Pass them to a new CameraUpdateObject
         CameraUpdate center = CameraUpdateFactory.newLatLng(location);
 
         //Position and zoom camera;
         googleMap.moveCamera(center);
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));*/
+        this.goToLocation(lat, lng, 17);
     }
 
     /**
@@ -274,10 +275,20 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
+        long fixTime;
+        long time;
+        long age = 60001;
 
-        long fixTime = location.getTime();
-        long time = System.currentTimeMillis();
-        long age = time - fixTime;
+        try
+        {
+            fixTime = location.getTime();
+            time = System.currentTimeMillis();
+            age = time - fixTime;
+        }
+        catch (NullPointerException npe)
+        {
+            npe.printStackTrace();
+        }
 
         //if less than one hour use built in location.
         if (age > 1000 * 60)
@@ -289,6 +300,16 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
 
         double lat = location.getLatitude();
         double lng = location.getLongitude();
+
+        /*try
+        {
+            lat = location.getLatitude();
+            lng = location.getLongitude();
+        }
+        catch (NullPointerException npe)
+        {
+            npe.printStackTrace();
+        }*/
         this.goToLocation(lat, lng);
     }
 
@@ -296,6 +317,7 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
     public void handleNewLocation(Location location)
     {
         Log.d(TAG, location.toString());
+        SoundPlayer.vibrate(750, this.getActivity());
         //Toast for when we get a new location
         Toast.makeText(this.getActivity().getApplicationContext(), "New Location",
                 Toast.LENGTH_SHORT).show();
@@ -353,7 +375,10 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
                 options = new MarkerOptions()
                         .position(latLng)
                         .title("I am here! " + track);
+                options.icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
                 googleMap.addMarker(options);
+                track++;
             }
 
             startPostion = googleMap.addMarker(startPostionMarkerOptions);
@@ -364,7 +389,7 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
             }
 
             locations.add(location);
-            track++;
+
             this.drawPolyline();
         }
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -439,7 +464,6 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
                               android.content.Intent intent)
         {
             //I the received broadcast is this action do somthing.
-
             if (intent.getAction().equals(AppConstraints.LOCATION_BROADCAST))
             {
                 if (intent.getExtras() != null)
@@ -454,7 +478,6 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
             }//end for
             else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
             {
-
                 if (intent.getExtras() != null)
                 {
                     Bundle b = intent.getExtras();
@@ -464,12 +487,9 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
                     MyMapFragment.this.goToLocation(lat, lng, zoom);
 
                 }
-
             }
             else if (intent.getAction().equals(AppConstraints.BROADCAST_THREE))
             {
-
-
                 if (intent.getExtras() != null)
                 {
                     Bundle b = intent.getExtras();
@@ -478,11 +498,8 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
                     int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
                     MyMapFragment.this.goToLocation(lat, lng, zoom);
 
-                }//end if
-                //   Toast.makeText(Map.this.getActivity().getApplicationContext(),
-                // "Location Broadcast THREE Received in map", Toast.LENGTH_SHORT).show();
-            }//end if
-
+                }
+            }
         }// end onReceive-----------------------------------------------------------------
 
     };

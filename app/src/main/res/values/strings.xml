@@ -21,6 +21,9 @@
     <string name="action_stop">Stop Recording</string>
     <string name="action_save">Save Route</string>
     <string name="sample_name">MyRoute</string>
-    <string name="sample_date">4-18-2016</string>
+    <string name="sample_date">4–18–2016</string>
     <string name="sample_distance">40mi</string>
+    <string name="gps_network_not_enabled">GPS network not enabled</string>
+    <string name="open_location_settings">Open location settings</string>
+    <string name="cancel">Cancel</string>
 </resources>
