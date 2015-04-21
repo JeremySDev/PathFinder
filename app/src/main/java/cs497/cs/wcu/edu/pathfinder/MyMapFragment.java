@@ -79,6 +79,7 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
+        //Check if the rootview is null if so initilize it
         if (rootView == null)
         {
             rootView = inflater.inflate(R.layout.activity_maps, container, false);
@@ -86,13 +87,11 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         return rootView;
     }
 
+    /**
+     * initilizeMap - If our Google Map is null we initilize it.
+
     private void initilizeMap()
     {
-
-        if (googleMap == null)
-        {
-            googleMap = fragment.getMap();
-        }
 
         if (googleMap == null)
         {
@@ -100,59 +99,20 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
                     "Sorry! unable to create maps", Toast.LENGTH_SHORT)
                     .show();
         }
-    }
+    }*/
 
-    public void onStartMap()
-    {
-        this.initilizeMap();
-        //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-
-
-        // When map has loaded start animate the camera.
-        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
-        {
-            @Override
-            public void onMapLoaded()
-            {
-                MyMapFragment.this.goToLastFix();
-            }
-        });
-
-
-        Context ctx = this.getActivity();
-        LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
-
-        int minTime = 5000;// 5 miliseconds
-        int minDist = 10;// 10 meters
-
-        //A newer simpler way to do it.
-        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener()
-        {
-            @Override
-            public void onMyLocationChange(Location location)
-            {
-                Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                        " My New Location " + location.toString(), Toast.LENGTH_LONG);
-                //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
-            }
-        });
-        //Enable listeners
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, oll);
-
-        //Enable listeners
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, oll);
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-
-        //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
-
         Log.v(TAG, "onActivityCreated called");
+
+        //Find our map fragment
         FragmentManager fm = getChildFragmentManager();
         fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
+
+        //If map fragment is still null replace it
         if (fragment == null)
         {
             fragment = SupportMapFragment.newInstance();
@@ -175,13 +135,62 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         this.getActivity().registerReceiver(receiver, filter);
     }
 
+    /**
+     * onStartMap - Checks if the map is null if so it gets a map from fragment. Then it attaches a
+     * OnMapLoaded Callback which tells the map find the last fixed location. Adds a
+     * OnMyLocationChange Listener that tells the map to call handleNewLocation.
+     */
+    public void onStartMap()
+    {
+        Context ctx = this.getActivity();
+        LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
+
+        // 5 miliseconds
+        int minTime = 5000;
+
+        // 10 meters
+        int minDist = 10;
+
+        //Check if the map is null if so it gets a map from fragment
+        if (googleMap == null)
+        {
+            googleMap = fragment.getMap();
+        }
+
+        //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+
+        // When map has loaded animate the camera to the user position.
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
+        {
+            @Override
+            public void onMapLoaded()
+            {
+                MyMapFragment.this.goToLastFix();
+            }
+        });
+
+        //Tells the map that when the position changes call handleNewLocation
+        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener()
+        {
+            @Override
+            public void onMyLocationChange(Location location)
+            {
+                Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
+                        " My New Location " + location.toString(), Toast.LENGTH_LONG);
+            }
+        });
+
+        //Enable listeners for GPS and Network provigers
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, oll);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, oll);
+    }
+
     @Override
     public void onPause()
     {
         Log.v(TAG, "On Pause Called");
         super.onPause();
         //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
-        //mLocationProvider.disconnect();
     }
 
     /**
@@ -194,14 +203,6 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
     {
 
         //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
-        /*LatLng location = new LatLng(lat, lng);
-
-        //Pass them to a new CameraUpdateObject
-        CameraUpdate center = CameraUpdateFactory.newLatLng(location);
-
-        //Position and zoom camera;
-        googleMap.moveCamera(center);
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));*/
         this.goToLocation(lat, lng, 17);
     }
 
@@ -214,23 +215,21 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
      */
     public void goToLocation(double lat, double lng, int zoom)
     {
-
+        //Create a new latlng object from the lat and lng double params
         LatLng location = new LatLng(lat, lng);
 
-        //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
-        // /Copy in when required
+        //Setup how the user will view the map
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(location)      // Sets the center of the map to Mountain View
-                .zoom(zoom)                   // Sets the zoom
-                .bearing(90)                // Sets the orientation of the camera to east
-                .tilt(0)                    //to  0 degrees
-                .build();                   // Creates a CameraPosition from the builder
+                .target(location) // Sets the center of the map to Mountain View
+                .zoom(zoom)       // Sets the zoom
+                .bearing(90)      // Sets the orientation of the camera to east
+                .tilt(0)          // tilt 0 degrees
+                .build();         // Creates a CameraPosition from the builder
 
         CameraUpdate center = CameraUpdateFactory.newCameraPosition(cameraPosition);
 
-        googleMap.animateCamera(center);
-
         //Position and zoom camera;
+        googleMap.animateCamera(center);
         googleMap.moveCamera(center);
     }
 
@@ -269,6 +268,9 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
     }
 
 
+    /**
+     * goToLastFix - finds the users last fixed location.
+     */
     public void goToLastFix()
     {
         Context ctx = this.getActivity();
@@ -276,13 +278,13 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
         long fixTime;
-        long time;
+        long time = System.currentTimeMillis();
         long age = 60001;
 
+        //Try and get the time of the location object so that we can see how old it is
         try
         {
             fixTime = location.getTime();
-            time = System.currentTimeMillis();
             age = time - fixTime;
         }
         catch (NullPointerException npe)
@@ -301,15 +303,6 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        /*try
-        {
-            lat = location.getLatitude();
-            lng = location.getLongitude();
-        }
-        catch (NullPointerException npe)
-        {
-            npe.printStackTrace();
-        }*/
         this.goToLocation(lat, lng);
     }
 
@@ -396,9 +389,12 @@ public class MyMapFragment extends Fragment /*implements LocationProvider.Locati
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
     }
 
+
+    /**
+     * drawPolyline - draws the polyline of the users route
+     */
     public void drawPolyline()
     {
-
         PolylineOptions po = new PolylineOptions();
         po.addAll(points);
         po.color(Color.BLUE);
