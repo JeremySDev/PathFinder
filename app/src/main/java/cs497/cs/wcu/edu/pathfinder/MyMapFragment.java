@@ -59,9 +59,9 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
     private Polyline route;
 
-    private static int track = 0;
-
     private boolean trackRoute = true;
+
+    private static int track = 0;
 
     private static boolean firstMarker = true;
     private static boolean lastMarker = false;
@@ -92,32 +92,11 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        SoundPlayer.makeSound(SoundPlayer.SOUND_FANFAIRE);
-
-/*
-        FragmentManager fm = getChildFragmentManager();
-        fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
-        if (fragment == null)
+        if (rootView == null)
         {
-            fragment = SupportMapFragment.newInstance();
-            fm.beginTransaction().replace(R.id.map, fragment).commit();
-        }*/
-
-        try
-        {
-            if (rootView == null)
-            {
-                rootView = inflater.inflate(R.layout.activity_maps, container, false);
-
-                // Loading map
-                initilizeMap();
-            }
-
+            rootView = inflater.inflate(R.layout.activity_maps, container, false);
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }//end catch
+
 
         return rootView;
     }
@@ -142,43 +121,26 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
     public void onStartMap()
     {
         this.initilizeMap();
-        //super.onStart();
-        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
-
-        //This class will listen for Long map clicks
-        //googleMap.setOnMapLongClickListener(this);
-        //googleMap.setOnMapClickListener(this);
+        //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
         /**
          * When map has loaded start animate the camera.
          */
-        /*googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
+        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
         {
             @Override
             public void onMapLoaded()
             {
-
-
-                ///////////////////////////////////////////////////////////////////////////
-                Map.this.goToLastFix();//if possible go to last fix/////////////////////////
-                ////////////////////////////////////////////////////////////////////////////
-
-                for (MarkerOptions op : AppConstraints.mapMarkers)
-                {
-                    googleMap.addMarker(op);
-                }
+                MyMapFragment.this.goToLastFix();
             }
-        });*///end setOnMapLoadeds
+        });
 
 
         Context ctx = this.getActivity();
         LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
 
-
         int minTime = 5000;// 5 miliseconds
         int minDist = 10;// 10 meters
-
 
         //A newer simpler way to do it.
         googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener()
@@ -188,23 +150,23 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
             {
                 Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
                         " My New Location " + location.toString(), Toast.LENGTH_LONG);
-                SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
+                //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
             }
         });
         //Enable listeners
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, oll);
 
-
         //Enable listeners
         lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, oll);
-
-
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
+
+        //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
+
         Log.v(TAG, "onActivityCreated called");
         FragmentManager fm = getChildFragmentManager();
         fragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
@@ -235,7 +197,7 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
     {
         Log.v(TAG, "On Pause Called");
         super.onPause();
-        SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
+        //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
         //mLocationProvider.disconnect();
     }
 
@@ -249,7 +211,7 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
     public void goToLocation(double lat, double lng)
     {
 
-        SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
+        //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
         LatLng location = new LatLng(lat, lng);
 
         //Pass them to a new CameraUpdateObject
@@ -257,6 +219,7 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
         //Position and zoom camera;
         googleMap.moveCamera(center);
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
     }
 
     /**
@@ -272,7 +235,7 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
         LatLng location = new LatLng(lat, lng);
 
-        SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
+        //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
         // /Copy in when required
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(location)      // Sets the center of the map to Mountain View
@@ -359,8 +322,8 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
             double lng = newLocation.getLongitude();
             MyMapFragment.this.goToLocation(lat, lng);
 
-            SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
-            SoundPlayer.vibrate(100);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
+
         }//end onLocationChanged
 
         public void onStatusChanged(String provider, int status, Bundle extras)
@@ -371,28 +334,17 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         {
             Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
                     provider + " is on", Toast.LENGTH_LONG);
-            SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP8);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP8);
         }//end onProviderEnabled.
 
         public void onProviderDisabled(String provider)
         {
             Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
                     provider + " is off", Toast.LENGTH_LONG);
-            SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
         } //end onProviderDisabled.
 
     };
-/*
-    private void setUpMap()
-    {
-        if (googleMap == null)
-        {
-            googleMap = fragment.getMap();
-        }
-        //googleMap.setMyLocationEnabled(true);
-        //googleMap.getMyLocation();
-    }*/
-
 
     /**
      * onOptionsItemSelected - determines what happens when a user clicks on a menu item
@@ -428,8 +380,9 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         }
     }
 
-/*
-    public void goToLastFix(){
+
+    public void goToLastFix()
+    {
         Context ctx = this.getActivity();
         LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -440,7 +393,8 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         long age = time - fixTime;
 
         //if less than one hour use built in location.
-        if(age > 1000 * 60){
+        if (age > 1000 * 60)
+        {
             location = new Location("Cullowhee");
             location.setLatitude(AppConstraints.CULLOWHEE.latitude);
             location.setLongitude(AppConstraints.CULLOWHEE.longitude);
@@ -448,8 +402,8 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
         double lat = location.getLatitude();
         double lng = location.getLongitude();
-        this.goToLocation(lat,lng);
-    }*/
+        this.goToLocation(lat, lng);
+    }
 
 
     public void handleNewLocation(Location location)

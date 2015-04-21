@@ -25,7 +25,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Vibrator;
 
 import java.io.IOException;
 
@@ -104,16 +103,16 @@ public class SoundPlayer
 	 {
 	//	 if (soundID == SOUND_BLIP1 || soundID == SOUND_BLIP2) return;
 		 
-		try
-		{
+		/*try
+		{*/
             Context context = AppConstraints.getInstance();
 			mp = MediaPlayer.create(context, soundID);
 			mp.start();
-		}//end try
+		/*}//end try
 		catch(Exception e)
 		{
 			e.printStackTrace();
-		}//end catch
+		}*///end catch
 		 
 	 }//======================================================================
 	 
@@ -169,7 +168,7 @@ public class SoundPlayer
 	  * permissions are enabled in the manifest.
 	  */
 	 //=======================================================================
-	 public static void vibrate(int timeMs)
+	 /*public static void vibrate(int timeMs)
 	 {
 
          Context context = AppConstraints.getInstance();
@@ -182,5 +181,5 @@ public class SoundPlayer
 		 {
 			 e.printStackTrace();
 		 }//end catch
-	 }//======================================================================
+	 }*///======================================================================
 }//#####################################################################

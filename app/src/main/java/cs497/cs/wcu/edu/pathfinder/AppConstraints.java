@@ -3,6 +3,7 @@ package cs497.cs.wcu.edu.pathfinder;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 
@@ -28,7 +29,6 @@ public class AppConstraints extends Application
     /**Intend key for fubar**/
     public static final String KEY_FOOBAR = "cs497.cs.wcu.edu.pathfinder.FOOBAR";
 
-
     /**A tab change is occouring**/
     public static final String TAB_BROADCAST ="broadcast_tab";
 
@@ -46,6 +46,7 @@ public class AppConstraints extends Application
 
     /**A forth broadcast**/
     public static  final String BROADCAST_FOUR = "edu.wcu.location_broadcast_four";
+    public static final LatLng CULLOWHEE = new LatLng(35.308016, -83.165131);
 
     private static AppConstraints instance;
 
