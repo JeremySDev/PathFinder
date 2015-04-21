@@ -36,45 +36,32 @@ import java.util.LinkedList;
  *
  *
  */
-public class MyMapFragment extends Fragment implements LocationProvider.LocationCallback
+public class MyMapFragment extends Fragment /*implements LocationProvider.LocationCallback*/
 {
-
-
     public static final String TAG = MyMapFragment.class.getSimpleName();
-
-    private SupportMapFragment fragment;
-
-    private GoogleMap googleMap;
-
-    private LocationProvider mLocationProvider;
-
-    private LinkedList<LatLng> points = new LinkedList<>();
-    private LinkedList<Location> locations = new LinkedList<>();
-
-    private Marker startPostion;
-    private Marker endPostion;
-
-    private MarkerOptions startPostionMarkerOptions;
-    private MarkerOptions endPostionMarkerOptions;
-
-    private Polyline route;
-
-    private boolean trackRoute = true;
-
     private static int track = 0;
-
     private static boolean firstMarker = true;
     private static boolean lastMarker = false;
+    View rootView = null;
 
+    private SupportMapFragment fragment;
+    private GoogleMap googleMap;
+    private LinkedList<LatLng> points = new LinkedList<>();
+    private LinkedList<Location> locations = new LinkedList<>();
+    private Marker startPostion;
+    private Marker endPostion;
+    private MarkerOptions startPostionMarkerOptions;
+    private MarkerOptions endPostionMarkerOptions;
+    private Polyline route;
+    private boolean trackRoute = true;
     private float routeDistance = 0.0f;
-
     private Location lastLocation;
 
-    View rootView = null;
     /**
      * The map has run once *
      */
     boolean runOnce = true;
+
 
     /**
      * Does the initial creation of the fragment*
@@ -85,7 +72,7 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         super.onCreate(savedInstanceState);
         this.setHasOptionsMenu(true);
 
-        mLocationProvider = new LocationProvider(this.getActivity(), this);
+        //mLocationProvider = new LocationProvider(this.getActivity(), this);
     }
 
     @Override
@@ -96,8 +83,6 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         {
             rootView = inflater.inflate(R.layout.activity_maps, container, false);
         }
-
-
         return rootView;
     }
 
@@ -117,15 +102,13 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         }
     }
 
-
     public void onStartMap()
     {
         this.initilizeMap();
         //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
-        /**
-         * When map has loaded start animate the camera.
-         */
+
+        // When map has loaded start animate the camera.
         googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
         {
             @Override
@@ -207,7 +190,6 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
      * @param lat The latitude to display.
      * @param lng The longitude to display
      */
-    //=======================================================================================
     public void goToLocation(double lat, double lng)
     {
 
@@ -229,7 +211,6 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
      * @param lng  The longitude to display
      * @param zoom The zoom level of the application.
      */
-    //=======================================================================================
     public void goToLocation(double lat, double lng, int zoom)
     {
 
@@ -251,100 +232,6 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
         //Position and zoom camera;
         googleMap.moveCamera(center);
     }
-
-    private BroadcastReceiver receiver = new BroadcastReceiver()
-    {
-        //--------------------------------------------------------------------------------
-
-        /** Receives broadcast messages from the system. */
-        //--------------------------------------------------------------------------------
-        @Override
-        public void onReceive(android.content.Context context,
-                              android.content.Intent intent)
-        {
-            //I the received broadcast is this action do somthing.
-
-            if (intent.getAction().equals(AppConstraints.LOCATION_BROADCAST))
-            {
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble("LNG");
-                    double lat = b.getDouble("LAT");
-                    MyMapFragment.this.goToLocation(lat, lng);
-
-                }//end if
-
-            }//end for
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
-            {
-
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
-                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
-                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    MyMapFragment.this.goToLocation(lat, lng, zoom);
-
-                }
-
-            }
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_THREE))
-            {
-
-
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
-                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
-                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    MyMapFragment.this.goToLocation(lat, lng, zoom);
-
-                }//end if
-                //   Toast.makeText(Map.this.getActivity().getApplicationContext(),
-                // "Location Broadcast THREE Received in map", Toast.LENGTH_SHORT).show();
-            }//end if
-
-        }// end onReceive-----------------------------------------------------------------
-
-    };
-
-    LocationListener oll = new LocationListener()
-    {
-        @Override
-        public void onLocationChanged(Location newLocation)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    " New Location " + newLocation.toString(), Toast.LENGTH_LONG);
-            double lat = newLocation.getLatitude();
-            double lng = newLocation.getLongitude();
-            MyMapFragment.this.goToLocation(lat, lng);
-
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
-
-        }//end onLocationChanged
-
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-        }//end onStatisChanged
-
-        public void onProviderEnabled(String provider)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    provider + " is on", Toast.LENGTH_LONG);
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP8);
-        }//end onProviderEnabled.
-
-        public void onProviderDisabled(String provider)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    provider + " is off", Toast.LENGTH_LONG);
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
-        } //end onProviderDisabled.
-
-    };
 
     /**
      * onOptionsItemSelected - determines what happens when a user clicks on a menu item
@@ -486,27 +373,6 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
     public void drawPolyline()
     {
-        /*
-        points.add(new LatLng(35.303268, -83.182322));
-        points.add(new LatLng(35.310450, -83.182631));
-        points.add(new LatLng(35.311357, -83.182171));
-        points.add(new LatLng(35.310517, -83.183470));
-        points.add(new LatLng(35.311235, -83.181227));
-        points.add(new LatLng(35.313028, -83.179745));
-        points.add(new LatLng(35.311295, -83.181263));
-        points.add(new LatLng(35.305279, -83.182494));
-        points.add(new LatLng(35.310717, -83.183028));
-        points.add(new LatLng(35.307502, -83.182880));
-        points.add(new LatLng(35.311440, -83.183000));
-        points.add(new LatLng(35.309005, -83.186424));
-        points.add(new LatLng(35.306355, -83.186963));
-        points.add(new LatLng(35.310464, -83.186638));
-        points.add(new LatLng(35.307116, -83.184431));
-        points.add(new LatLng(35.309418, -83.183299));
-        points.add(new LatLng(35.310000, -83.182575));
-        points.add(new LatLng(35.311339, -83.178967));
-        points.add(new LatLng(35.301412, -83.181435));
-        points.add(new LatLng(35.309188, -83.186925));*/
 
         PolylineOptions po = new PolylineOptions();
         po.addAll(points);
@@ -526,6 +392,100 @@ public class MyMapFragment extends Fragment implements LocationProvider.Location
 
         return distance;
     }
+
+    LocationListener oll = new LocationListener()
+    {
+        @Override
+        public void onLocationChanged(Location newLocation)
+        {
+            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
+                    " New Location " + newLocation.toString(), Toast.LENGTH_LONG);
+//            double lat = newLocation.getLatitude();
+//            double lng = newLocation.getLongitude();
+//            MyMapFragment.this.goToLocation(lat, lng);
+            handleNewLocation(newLocation);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
+
+        }//end onLocationChanged
+
+        public void onStatusChanged(String provider, int status, Bundle extras)
+        {
+        }//end onStatisChanged
+
+        public void onProviderEnabled(String provider)
+        {
+            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
+                    provider + " is on", Toast.LENGTH_LONG);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP8);
+        }//end onProviderEnabled.
+
+        public void onProviderDisabled(String provider)
+        {
+            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
+                    provider + " is off", Toast.LENGTH_LONG);
+            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
+        } //end onProviderDisabled.
+
+    };
+
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        //--------------------------------------------------------------------------------
+
+        /** Receives broadcast messages from the system. */
+        //--------------------------------------------------------------------------------
+        @Override
+        public void onReceive(android.content.Context context,
+                              android.content.Intent intent)
+        {
+            //I the received broadcast is this action do somthing.
+
+            if (intent.getAction().equals(AppConstraints.LOCATION_BROADCAST))
+            {
+                if (intent.getExtras() != null)
+                {
+                    Bundle b = intent.getExtras();
+                    double lng = b.getDouble("LNG");
+                    double lat = b.getDouble("LAT");
+                    MyMapFragment.this.goToLocation(lat, lng);
+
+                }//end if
+
+            }//end for
+            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
+            {
+
+                if (intent.getExtras() != null)
+                {
+                    Bundle b = intent.getExtras();
+                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
+                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
+                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
+                    MyMapFragment.this.goToLocation(lat, lng, zoom);
+
+                }
+
+            }
+            else if (intent.getAction().equals(AppConstraints.BROADCAST_THREE))
+            {
+
+
+                if (intent.getExtras() != null)
+                {
+                    Bundle b = intent.getExtras();
+                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
+                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
+                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
+                    MyMapFragment.this.goToLocation(lat, lng, zoom);
+
+                }//end if
+                //   Toast.makeText(Map.this.getActivity().getApplicationContext(),
+                // "Location Broadcast THREE Received in map", Toast.LENGTH_SHORT).show();
+            }//end if
+
+        }// end onReceive-----------------------------------------------------------------
+
+    };
 
 
 }
