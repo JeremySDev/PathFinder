@@ -72,7 +72,7 @@ public class MainActivity extends ActionBarActivity
         if (position == 0)
         {
             fragment = new FileLoadFragment();
-            fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
         }
         if (position == 1)
         {
