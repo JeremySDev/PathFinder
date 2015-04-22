@@ -30,6 +30,13 @@ public class LocationProvider
         //this.googleMap = this.myMapFragment.googleMap;
     }
 
+    /**
+     * onStartMap - Checks if the map is null if so it gets a map from fragment. Then it attaches a
+     * OnMapLoaded Callback which tells the map find the last fixed location. Adds a
+     * OnMyLocationChange Listener that tells the map to call handleNewLocation.
+     *
+     * @param googleMap
+     */
     public void onStartMap(GoogleMap googleMap)
     {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
@@ -124,7 +131,7 @@ public class LocationProvider
                 }//end if
 
             }//end for
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
+            /*else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
             {
                 if (intent.getExtras() != null)
                 {
@@ -132,7 +139,7 @@ public class LocationProvider
                     double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
                     double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
                     int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    myMapFragment.goToLocation(lat, lng, zoom);
+                    //myMapFragment.goToLocation(lat, lng, zoom);
 
                 }
             }
@@ -144,10 +151,10 @@ public class LocationProvider
                     double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
                     double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
                     int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    myMapFragment.goToLocation(lat, lng, zoom);
+                    //myMapFragment.goToLocation(lat, lng, zoom);
 
                 }
-            }
+            }*/
         }// end onReceive-----------------------------------------------------------------
 
     };

@@ -59,11 +59,10 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-
     @Override
     public void onNavigationDrawerItemSelected(int position)
     {
-        Fragment fragment;
+        Fragment fragment = new FileLoadFragment();
         Fragment mapFragment = new MyMapFragment();
         Log.v(tag, "" + dirEmpty);
         // update the main content by replacing fragments
@@ -71,13 +70,12 @@ public class MainActivity extends ActionBarActivity
 
         if (position == 0)
         {
-            fragment = new FileLoadFragment();
             fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
         }
         if (position == 1)
         {
             //fragment = new MyMapFragment();
-            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
         }
     }
 

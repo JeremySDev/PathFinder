@@ -51,7 +51,7 @@ public class MyMapFragment extends Fragment
     private MarkerOptions startPostionMarkerOptions;
     private MarkerOptions endPostionMarkerOptions;
     private Polyline route;
-    private boolean trackRoute = true;
+    private boolean trackRoute = false;
     private float routeDistance = 0.0f;
     private Location lastLocation;
 
@@ -61,7 +61,13 @@ public class MyMapFragment extends Fragment
      * The map has run once *
      */
     boolean runOnce = true;
+    boolean firstLocate = true;
 
+    Marker myCurrentLocation;
+
+    Location currentLocation;
+
+    LatLng currentLatLng;
 
     /**
      * Does the initial creation of the fragment*
@@ -114,7 +120,12 @@ public class MyMapFragment extends Fragment
         {
             googleMap = fragment.getMap();
         }
-        locationProvider.onStartMap(googleMap);
+        googleMap.setMyLocationEnabled(true);
+        if (runOnce)
+        {
+            locationProvider.onStartMap(googleMap);
+            runOnce = false;
+        }
         /////////////////////////////////////
         //REGISTERING THE BROADCAST RECEIVER
         ////////////////////////////////////////
@@ -144,7 +155,7 @@ public class MyMapFragment extends Fragment
     {
 
         //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
-        this.goToLocation(lat, lng, 17);
+        //this.goToLocation(lat, lng, 17);
     }
 
     /**
@@ -187,17 +198,18 @@ public class MyMapFragment extends Fragment
         switch (item.getItemId())
         {
             //if the user picked save open the name file dialog
+            //handle pressing dialog twice
             case R.id.action_record:
                 Toast.makeText(this.getActivity().getApplicationContext(), "Record",
                         Toast.LENGTH_SHORT).show();
                 trackRoute = true;
+                this.setStartPostion();
                 return true;
             //if the user pressed undo call the customViews undo method
             case R.id.action_stop:
                 Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
                         Toast.LENGTH_SHORT).show();
-                lastMarker = true;
-                this.markMap(0.0f, points.getLast());
+                this.setEndPostion();
                 return true;
             //if the user pressed clear call the customViews clearScreen method
             case R.id.action_save:
@@ -250,14 +262,46 @@ public class MyMapFragment extends Fragment
 
     public void handleNewLocation(Location location)
     {
-        Log.d(TAG, location.toString());
-
-        SoundPlayer.vibrate(750, this.getActivity());
-
-        //Toast for when we get a new location
         Toast.makeText(this.getActivity().getApplicationContext(), "New Location Called",
                 Toast.LENGTH_SHORT).show();
+        Log.d(TAG, location.toString());
+        SoundPlayer.vibrate(500, this.getActivity());
 
+        currentLocation = location;
+
+        //Get the current Latitude and Longitude of the location
+        double currentLatitude = currentLocation.getLatitude();
+        double currentLongitude = currentLocation.getLongitude();
+
+        //Create a LatLng object from our new location
+        currentLatLng = new LatLng(currentLatitude, currentLongitude);
+
+        this.updateCurrentLocationMarker();
+
+        float disRecentPoints = 0.0f;
+
+        if (locations.size() >= 1)
+        {
+            disRecentPoints = location.distanceTo(locations.getLast());
+            Toast.makeText(this.getActivity().getApplicationContext(),
+                    "Distance: " + disRecentPoints,
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        //Start location
+        if (trackRoute)
+        {
+            if (disRecentPoints >= 2.0f && disRecentPoints <= 60.0f)
+            {
+                points.add(currentLatLng);
+                track++;
+            }
+            locations.add(currentLocation);
+        }
+        this.drawPolyline();
+
+
+/*
         //Get the current Latitude and Longitude of the location
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
@@ -267,6 +311,12 @@ public class MyMapFragment extends Fragment
 
         //Create a LatLng object from our new location
         LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+
+        MarkerOptions options = options = new MarkerOptions()
+                .position(latLng)
+                .title("You are here! ");
+        options.icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
         //Check if we can start comparing the distance between points
         if (locations.size() >= 1)
@@ -294,8 +344,88 @@ public class MyMapFragment extends Fragment
 
             this.drawPolyline();
         }
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+        googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));*/
+        ///googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+    }
+
+    private void updateCurrentLocationMarker()
+    {
+
+
+        MarkerOptions options = options = new MarkerOptions()
+                .position(currentLatLng)
+                .title("You are here! ");
+        options.icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
+        if (myCurrentLocation != null)
+        {
+            myCurrentLocation.remove();
+        }
+
+        myCurrentLocation = googleMap.addMarker(options);
+
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
+        if (firstLocate)
+        {
+            googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+            firstLocate = false;
+        }
+        SoundPlayer.vibrate(500, this.getActivity());
+        //Toast for when we get a new location
+        Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void setStartPostion()
+    {
+
+        Toast.makeText(this.getActivity().getApplicationContext(),
+                "Set Start Point",
+                Toast.LENGTH_SHORT).show();
+        if (myCurrentLocation != null)
+        {
+            myCurrentLocation.remove();
+        }
+
+        startPostionMarkerOptions = new MarkerOptions()
+                .position(currentLatLng)
+                .title("Start");
+        startPostionMarkerOptions.icon(
+                BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+        googleMap.addMarker(startPostionMarkerOptions);
+        //Add the latlng object to a the linkedlist of points
+        points.add(currentLatLng);
+        locations.add(currentLocation);
+    }
+
+
+    private void setEndPostion()
+    {
+        Toast.makeText(this.getActivity().getApplicationContext(),
+                "Set End Point",
+                Toast.LENGTH_SHORT).show();
+        if (myCurrentLocation != null)
+        {
+            myCurrentLocation.remove();
+        }
+
+        endPostionMarkerOptions = new MarkerOptions()
+                .position(currentLatLng)
+                .title("End");
+        endPostionMarkerOptions.icon(
+                BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+        googleMap.addMarker(endPostionMarkerOptions);
+        //Add the latlng object to a the linkedlist of points
+        points.add(currentLatLng);
+        locations.add(currentLocation);
     }
 
 
@@ -309,7 +439,7 @@ public class MyMapFragment extends Fragment
         {
             startPostionMarkerOptions = new MarkerOptions()
                     .position(latLng)
-                    .title("Start  " + track);
+                    .title("Start");
             startPostionMarkerOptions.icon(
                     BitmapDescriptorFactory
                             .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
@@ -321,15 +451,16 @@ public class MyMapFragment extends Fragment
         {
             endPostionMarkerOptions = new MarkerOptions()
                     .position(latLng)
-                    .title("Finish " + track);
+                    .title("Finish");
             endPostionMarkerOptions.icon(BitmapDescriptorFactory
                     .defaultMarker(BitmapDescriptorFactory.HUE_RED));
             //Add the latlng object to a the linkedlist of points
             //points.add(latLng);
             trackRoute = false;
         }
-        else if (disRecentPoints >= 2.0f && disRecentPoints >= 60.0f)
+        else if (disRecentPoints >= 2.0f && disRecentPoints <= 60.0f)
         {
+            SoundPlayer.vibrate(750, this.getActivity());
             if (track % 5 == 0)
             {
                 options = new MarkerOptions()
@@ -353,7 +484,7 @@ public class MyMapFragment extends Fragment
     {
         PolylineOptions po = new PolylineOptions();
         po.addAll(points);
-        po.color(Color.BLUE);
+        po.color(Color.GREEN);
         po.width(20.0f);
         route = googleMap.addPolyline(po);
     }
@@ -370,144 +501,6 @@ public class MyMapFragment extends Fragment
         return distance;
     }
 
-    /**
-     * onStartMap - Checks if the map is null if so it gets a map from fragment. Then it attaches a
-     * OnMapLoaded Callback which tells the map find the last fixed location. Adds a
-     * OnMyLocationChange Listener that tells the map to call handleNewLocation.
-     */
-   /* public void onStartMap()
-    {
-        Context ctx = this.getActivity();
-        LocationManager lm = (LocationManager) ctx.getSystemService(ctx.LOCATION_SERVICE);
-
-        // 5 miliseconds
-        int minTime = 5000;
-
-        // 10 meters
-        int minDist = 10;
-
-        //Check if the map is null if so it gets a map from fragment
-        if (googleMap == null)
-        {
-            googleMap = fragment.getMap();
-        }
-
-        //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-
-        // When map has loaded animate the camera to the user position.
-        googleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback()
-        {
-            @Override
-            public void onMapLoaded()
-            {
-                MyMapFragment.this.goToLastFix();
-            }
-        });
-
-        //Tells the map that when the position changes call handleNewLocation
-        googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener()
-        {
-            @Override
-            public void onMyLocationChange(Location location)
-            {
-                Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                        " My New Location " + location.toString(), Toast.LENGTH_LONG);
-            }
-        });
-
-        //Enable listeners for GPS and Network provigers
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist,
-        locationProvider.oll);
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist,
-        locationProvider.oll);
-    }*/
-
-/*
-    LocationListener oll = new LocationListener()
-    {
-        @Override
-        public void onLocationChanged(Location newLocation)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    " New Location " + newLocation.toString(), Toast.LENGTH_LONG);
-//            double lat = newLocation.getLatitude();
-//            double lng = newLocation.getLongitude();
-//            MyMapFragment.this.goToLocation(lat, lng);
-            handleNewLocation(newLocation);
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP1);
-
-        }//end onLocationChanged
-
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-        }//end onStatisChanged
-
-        public void onProviderEnabled(String provider)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    provider + " is on", Toast.LENGTH_LONG);
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP8);
-        }//end onProviderEnabled.
-
-        public void onProviderDisabled(String provider)
-        {
-            Toast.makeText(MyMapFragment.this.getActivity().getApplicationContext(),
-                    provider + " is off", Toast.LENGTH_LONG);
-            //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP7);
-        } //end onProviderDisabled.
-
-    };
-
-    private BroadcastReceiver receiver = new BroadcastReceiver()
-    {
-        //--------------------------------------------------------------------------------
-
-        /** Receives broadcast messages from the system. */
-    //--------------------------------------------------------------------------------
-       /* @Override
-        public void onReceive(android.content.Context context,
-                              android.content.Intent intent)
-        {
-            //I the received broadcast is this action do somthing.
-            if (intent.getAction().equals(AppConstraints.LOCATION_BROADCAST))
-            {
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble("LNG");
-                    double lat = b.getDouble("LAT");
-                    MyMapFragment.this.goToLocation(lat, lng);
-
-                }//end if
-
-            }//end for
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
-            {
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
-                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
-                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    MyMapFragment.this.goToLocation(lat, lng, zoom);
-
-                }
-            }
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_THREE))
-            {
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    double lng = b.getDouble(AppConstraints.KEY_LONGITUDE);
-                    double lat = b.getDouble(AppConstraints.KEY_LATITUDE);
-                    int zoom = b.getInt(AppConstraints.KEY_ZOOM_LEVEL);
-                    MyMapFragment.this.goToLocation(lat, lng, zoom);
-
-                }
-            }
-        }// end onReceive-----------------------------------------------------------------
-
-    };*/
 }
 
 //        geo fix -83.182322 35.303268
