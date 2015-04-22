@@ -35,6 +35,10 @@ public class MainActivity extends ActionBarActivity
 
     String tag = "IS EMPTY";
 
+    Fragment fileLoadFragment = new FileLoadFragment();
+    Fragment mapFragment = new MyMapFragment();
+    Fragment optionsFragment = new OptionsFragment();
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -59,12 +63,14 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    boolean first1 = true;
+    boolean first2 = true;
+    boolean first3 = true;
+
     @Override
     public void onNavigationDrawerItemSelected(int position)
     {
-        Fragment fileLoadFragment = new FileLoadFragment();
-        Fragment mapFragment = new MyMapFragment();
-        Fragment optionsFragment = new OptionsFragment();
+
 
         Log.v(tag, "" + dirEmpty);
         // update the main content by replacing fragments
@@ -72,17 +78,30 @@ public class MainActivity extends ActionBarActivity
 
         if (position == 0)
         {
-            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
+            if (first1)
+            {
+                fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
+                first1 = false;
+            }
         }
         if (position == 1)
         {
-            //fragment = new MyMapFragment();
-            fragmentManager.beginTransaction().replace(R.id.container, fileLoadFragment).commit();
+            if (first2)
+            {
+                fragmentManager.beginTransaction().replace(R.id.container, fileLoadFragment)
+                        .commit();
+                first2 = false;
+            }
         }
         if (position == 2)
         {
-            //fragment = new MyMapFragment();
-            fragmentManager.beginTransaction().replace(R.id.container, optionsFragment).commit();
+            if (first3)
+            {
+                fragmentManager.beginTransaction().replace(R.id.container, optionsFragment)
+                        .commit();
+                first3 = false;
+            }
+
         }
     }
 

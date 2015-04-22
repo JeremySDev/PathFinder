@@ -283,10 +283,9 @@ public class MyMapFragment extends Fragment
 
     public void handleNewLocation(Location location)
     {
-        Toast.makeText(this.getActivity().getApplicationContext(), "New Location Called",
-                Toast.LENGTH_SHORT).show();
-        Log.d(TAG, location.toString());
+        //Log.d(TAG, location.toString());
         //SoundPlayer.vibrate(500, this.getActivity());
+        SoundPlayer.makeNotificationSound(this.getActivity());
 
         currentLocation = location;
 
@@ -553,3 +552,4 @@ public class MyMapFragment extends Fragment
 //        geo fix -83.178967 35.311339
 //        geo fix -83.181435 35.301412
 //        geo fix -83.186925 35.309188
+

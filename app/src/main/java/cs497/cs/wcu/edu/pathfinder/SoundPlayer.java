@@ -63,10 +63,10 @@ public class SoundPlayer
      * Makes notification sound. Used to alert the user of important events.
      */
     //=========================================================================
-    public static void makeNotificationSound()
+    public static void makeNotificationSound(Context context)
     {
 
-        Context context = AppConstraints.getInstance();
+        //Context context = AppConstraints.getInstance();
 
         Uri alert = RingtoneManager.getDefaultUri
                 (RingtoneManager.TYPE_NOTIFICATION);
@@ -81,15 +81,15 @@ public class SoundPlayer
             final AudioManager audioManager =
                     (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-            if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0)
+            if (audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION) != 0)
             {
-                mp.setAudioStreamType(AudioManager.STREAM_ALARM);
+                mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
                 mp.setLooping(false);
                 mp.prepare();
                 mp.start();
             }//end if
         }//end try
-        catch (IOException e)
+        catch (IOException | NullPointerException e)
         {
             e.printStackTrace();
         }// catch
@@ -102,13 +102,13 @@ public class SoundPlayer
      * Plays the sound specified in soundID
      */
     //=========================================================================
-    public static void makeSound(int soundID)
+    public static void makeSound(int soundID, Context context)
     {
         //	 if (soundID == SOUND_BLIP1 || soundID == SOUND_BLIP2) return;
 
         try
         {
-            Context context = AppConstraints.getInstance();
+            //Context context = AppConstraints.getInstance();
             mp = MediaPlayer.create(context, soundID);
             mp.start();
         }//end try
@@ -128,11 +128,10 @@ public class SoundPlayer
      * @param soundID The ID of the sound to be looped.
      */
     //=======================================================================
-    public static void playLoopedSound(int soundID)
+    public static void playLoopedSound(int soundID, Context context)
     {
         try
         {
-            Context context = AppConstraints.getInstance();
             mp = MediaPlayer.create(context, soundID);
             mp.setLooping(true);
             mp.start();
