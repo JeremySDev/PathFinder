@@ -1,7 +1,6 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 import android.content.Context;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -62,6 +61,8 @@ public class MyMapFragment extends Fragment
      */
     boolean runOnce = true;
     boolean firstLocate = true;
+    boolean stopPressed = true;
+
 
     Marker myCurrentLocation;
 
@@ -129,11 +130,11 @@ public class MyMapFragment extends Fragment
         /////////////////////////////////////
         //REGISTERING THE BROADCAST RECEIVER
         ////////////////////////////////////////
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstraints.LOCATION_BROADCAST);
-        filter.addAction(AppConstraints.BROADCAST_TWO);
-        filter.addAction(AppConstraints.BROADCAST_THREE);
-        this.getActivity().registerReceiver(locationProvider.receiver, filter);
+        //IntentFilter filter = new IntentFilter();
+        //filter.addAction(AppConstraints.LOCATION_BROADCAST);
+        //filter.addAction(AppConstraints.BROADCAST_TWO);
+        //filter.addAction(AppConstraints.BROADCAST_THREE);
+        //this.getActivity().registerReceiver(locationProvider.receiver, filter);
     }
 
 
@@ -200,16 +201,36 @@ public class MyMapFragment extends Fragment
             //if the user picked save open the name file dialog
             //handle pressing dialog twice
             case R.id.action_record:
-                Toast.makeText(this.getActivity().getApplicationContext(), "Record",
-                        Toast.LENGTH_SHORT).show();
-                trackRoute = true;
-                this.setStartPostion();
+                if (stopPressed)
+                {
+                    Toast.makeText(this.getActivity().getApplicationContext(), "Record",
+                            Toast.LENGTH_SHORT).show();
+                    trackRoute = true;
+                    this.setStartPostion();
+                    stopPressed = false;
+                }
+                else
+                {
+                    Toast.makeText(this.getActivity().getApplicationContext(),
+                            "Press Stop Recording First",
+                            Toast.LENGTH_SHORT).show();
+                }
                 return true;
             //if the user pressed undo call the customViews undo method
             case R.id.action_stop:
-                Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
-                        Toast.LENGTH_SHORT).show();
-                this.setEndPostion();
+                if (!stopPressed)
+                {
+                    Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
+                            Toast.LENGTH_SHORT).show();
+                    this.setEndPostion();
+                    stopPressed = true;
+                }
+                else
+                {
+                    Toast.makeText(this.getActivity().getApplicationContext(),
+                            "Start Recording Route First",
+                            Toast.LENGTH_SHORT).show();
+                }
                 return true;
             //if the user pressed clear call the customViews clearScreen method
             case R.id.action_save:
@@ -265,7 +286,7 @@ public class MyMapFragment extends Fragment
         Toast.makeText(this.getActivity().getApplicationContext(), "New Location Called",
                 Toast.LENGTH_SHORT).show();
         Log.d(TAG, location.toString());
-        SoundPlayer.vibrate(500, this.getActivity());
+        //SoundPlayer.vibrate(500, this.getActivity());
 
         currentLocation = location;
 
@@ -291,7 +312,7 @@ public class MyMapFragment extends Fragment
         //Start location
         if (trackRoute)
         {
-            if (disRecentPoints >= 2.0f && disRecentPoints <= 60.0f)
+            if (disRecentPoints >= 5.0f && disRecentPoints <= 40.0f)
             {
                 points.add(currentLatLng);
                 track++;
@@ -387,6 +408,11 @@ public class MyMapFragment extends Fragment
         Toast.makeText(this.getActivity().getApplicationContext(),
                 "Set Start Point",
                 Toast.LENGTH_SHORT).show();
+
+        if (startPostion != null)
+        {
+           startPostion.remove();
+        }
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
@@ -411,6 +437,10 @@ public class MyMapFragment extends Fragment
         Toast.makeText(this.getActivity().getApplicationContext(),
                 "Set End Point",
                 Toast.LENGTH_SHORT).show();
+        if (endPostion != null)
+        {
+            endPostion.remove();
+        }
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
@@ -428,7 +458,7 @@ public class MyMapFragment extends Fragment
         locations.add(currentLocation);
     }
 
-
+/*
     private void markMap(float disRecentPoints, LatLng latLng)
     {
         //Marker for new location
@@ -474,7 +504,7 @@ public class MyMapFragment extends Fragment
             points.add(latLng);
             track++;
         }
-    }
+    }*/
 
 
     /**

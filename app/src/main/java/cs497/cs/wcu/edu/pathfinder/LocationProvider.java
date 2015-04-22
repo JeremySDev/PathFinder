@@ -1,6 +1,5 @@
 package cs497.cs.wcu.edu.pathfinder;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,7 +23,8 @@ public class LocationProvider
 
     MyMapFragment myMapFragment;
 
-    public LocationProvider(Context context, MyMapFragment myMapFragment) {
+    public LocationProvider(Context context, MyMapFragment myMapFragment)
+    {
         this.mContext = context;
         this.myMapFragment = myMapFragment;
         //this.googleMap = this.myMapFragment.googleMap;
@@ -107,14 +107,14 @@ public class LocationProvider
             Log.v(TAG, "Provider Disabled");
         }
     };
-
-    public BroadcastReceiver receiver = new BroadcastReceiver()
+}
+    /*public BroadcastReceiver receiver = new BroadcastReceiver()
     {
         //--------------------------------------------------------------------------------
 
         /** Receives broadcast messages from the system. */
         //--------------------------------------------------------------------------------
-        @Override
+       /* @Override
         public void onReceive(android.content.Context context,
                               android.content.Intent intent)
         {
@@ -130,7 +130,7 @@ public class LocationProvider
 
                 }//end if
 
-            }//end for
+            }end for*/
             /*else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
             {
                 if (intent.getExtras() != null)
@@ -155,7 +155,7 @@ public class LocationProvider
 
                 }
             }*/
-        }// end onReceive-----------------------------------------------------------------
+        // end onReceive-----------------------------------------------------------------
 
-    };
-}
+    //};
+

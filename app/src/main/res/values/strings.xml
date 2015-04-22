@@ -3,7 +3,7 @@
 
     <string name="title1_saved_routes">Saved Routes</string>
     <string name="title_section2">Route</string>
-    <string name="title_section3">Section 3</string>
+    <string name="title_section3">Options</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -26,4 +26,17 @@
     <string name="gps_network_not_enabled">GPS network not enabled</string>
     <string name="open_location_settings">Open location settings</string>
     <string name="cancel">Cancel</string>
+
+    <string-array name="marker_colors">
+        <item>Azure</item>
+        <item>Blue</item>
+        <item>Cyan</item>
+        <item>Green</item>
+        <item>Magenta</item>
+        <item>Orange</item>
+        <item>Red</item>
+        <item>Rose</item>
+        <item>Violet</item>
+        <item>Yellow</item>
+    </string-array>
 </resources>

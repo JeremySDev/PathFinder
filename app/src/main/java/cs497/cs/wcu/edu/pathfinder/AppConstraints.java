@@ -14,6 +14,8 @@ import java.io.File;
 public class AppConstraints extends Application
 {
 
+    public static final String PREFS = "cs497.cs.wcu.edu.pathfinder";
+
     //**Intent Key for zoom**
     public static final String KEY_TAB ="key_tab";
 
