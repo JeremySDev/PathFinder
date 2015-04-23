@@ -397,8 +397,7 @@ public class MyMapFragment extends Fragment
         }
         SoundPlayer.vibrate(500, this.getActivity());
         //Toast for when we get a new location
-        Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",
-                Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",Toast.LENGTH_SHORT).show();
     }
 
     private void setStartPostion()
