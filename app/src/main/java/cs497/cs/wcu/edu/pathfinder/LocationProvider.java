@@ -1,10 +1,14 @@
 package cs497.cs.wcu.edu.pathfinder;
 
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 
@@ -12,7 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
  * @author Jeremy Stilwell
  * @version 4/21/15.
  */
-public class LocationProvider
+public class LocationProvider extends Service implements LocationListener
 {
 
     //GoogleMap googleMap;
@@ -78,45 +82,50 @@ public class LocationProvider
         });
 
         //Enable listeners for GPS and Network provigers
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, oll);
-        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, oll);
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
     }
 
 
-    LocationListener oll = new LocationListener()
+    /*LocationListener oll = new LocationListener()
+    {*/
+    @Override
+    public void onLocationChanged(Location newLocation)
     {
-        @Override
-        public void onLocationChanged(Location newLocation)
-        {
-            Log.v(TAG, "Location Changed");
-            myMapFragment.handleNewLocation(newLocation);
-        }
+        Log.v(TAG, "Location Changed");
+        myMapFragment.handleNewLocation(newLocation);
+    }
 
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-            Log.v(TAG, "Status Changed");
-        }
+    public void onStatusChanged(String provider, int status, Bundle extras)
+    {
+        Log.v(TAG, "Status Changed");
+    }
 
-        public void onProviderEnabled(String provider)
-        {
-            Log.v(TAG, "Provider Enabled");
-        }
+    public void onProviderEnabled(String provider)
+    {
+        Log.v(TAG, "Provider Enabled");
+    }
 
-        public void onProviderDisabled(String provider)
-        {
-            Log.v(TAG, "Provider Disabled");
-        }
-    };
-}
-    /*public BroadcastReceiver receiver = new BroadcastReceiver()
+    public void onProviderDisabled(String provider)
+    {
+        Log.v(TAG, "Provider Disabled");
+    }
+    // };
+
+    @Override
+    public IBinder onBind(Intent intent)
+    {
+        return null;
+    }
+
+    public BroadcastReceiver receiver = new BroadcastReceiver()
     {
         //--------------------------------------------------------------------------------
 
         /** Receives broadcast messages from the system. */
         //--------------------------------------------------------------------------------
-       /* @Override
-        public void onReceive(android.content.Context context,
-                              android.content.Intent intent)
+        @Override
+        public void onReceive(Context context, Intent intent)
         {
             //I the received broadcast is this action do somthing.
             if (intent.getAction().equals(AppConstraints.LOCATION_BROADCAST))
@@ -130,8 +139,8 @@ public class LocationProvider
 
                 }//end if
 
-            }end for*/
-            /*else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
+            }//end for
+            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
             {
                 if (intent.getExtras() != null)
                 {
@@ -154,8 +163,8 @@ public class LocationProvider
                     //myMapFragment.goToLocation(lat, lng, zoom);
 
                 }
-            }*/
-        // end onReceive-----------------------------------------------------------------
-
-    //};
+            }
+        }
+    };
+}
 

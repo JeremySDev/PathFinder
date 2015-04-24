@@ -24,7 +24,14 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.StringReader;
 import java.util.LinkedList;
 
 
@@ -45,8 +52,8 @@ public class MyMapFragment extends Fragment
     public GoogleMap googleMap;
     private LinkedList<LatLng> points = new LinkedList<>();
     private LinkedList<Location> locations = new LinkedList<>();
-    private Marker startPostion;
-    private Marker endPostion;
+    private static Marker startPosition;
+    private Marker endPosition;
     private MarkerOptions startPostionMarkerOptions;
     private MarkerOptions endPostionMarkerOptions;
     private Polyline route;
@@ -186,6 +193,67 @@ public class MyMapFragment extends Fragment
         googleMap.moveCamera(center);
     }
 
+    public String markersToXML()
+    {
+        StringBuilder sb = new StringBuilder("");
+        sb.append("<route>\n");
+
+        sb.append("\t<startmarker>\n");
+        sb.append("\t\t<title>" + startPosition.getTitle() + "</title>\n");
+        sb.append("\t\t<lat>" + startPosition.getPosition().latitude + "</lat>\n");
+        sb.append("\t\t<lng>" + startPosition.getPosition().longitude + "</lat>\n");
+        sb.append("\t</startmarker>\n");
+
+        sb.append("\t<endmarker>\n");
+        sb.append("\t\t<title>" + endPosition.getTitle() + "</title>\n");
+        sb.append("\t\t<lat>" + endPosition.getPosition().latitude + "</lat>\n");
+        sb.append("\t\t<lng>" + endPosition.getPosition().longitude + "</lat>\n");
+        sb.append("\t</endmarker>\n");
+
+        sb.append("\t <points>\n");
+        for (LatLng latLng : points)
+        {
+            sb.append("\t\t<point>\n");
+            sb.append("\t\t\t<lat>" + latLng.latitude + "</lat>\n");
+            sb.append("\t\t\t<lng>" + latLng.longitude + "</lat>\n");
+            sb.append("\t\t</point>\n");
+        }//end for
+        sb.append("\t<points>\n");
+        sb.append("</route>\n");
+        return sb.toString();
+    }
+
+    public void parseXML(String rawXML)
+    {
+        Log.w("AndroidParseXMLActivity", "Start Parsing");
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        try
+        {
+            SAXParser saxParser = factory.newSAXParser();
+            XMLReader xmlreader = saxParser.getXMLReader();
+            MarkerXMLHandler handler = new MarkerXMLHandler();
+            xmlreader.setContentHandler(handler);
+            //myData = handler.getObjectList();
+            //Objects to read the stream.
+            InputSource inStream = new InputSource();
+            inStream.setCharacterStream(new StringReader(rawXML));
+            //Parse the input stream
+            //xmlreader.parse(inStream);
+            //Get the map markers from the handler.
+            //mapMarkers = handler.getMapMarkers();
+        }
+        catch (ParserConfigurationException e)
+        {
+            Toast.makeText(this.getActivity(), "Error reading xml file.", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        catch (SAXException e)
+        {
+            Toast.makeText(this.getActivity(), "Error reading xml file.", Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
     /**
      * onOptionsItemSelected - determines what happens when a user clicks on a menu item
      *
@@ -283,7 +351,11 @@ public class MyMapFragment extends Fragment
 
     public void handleNewLocation(Location location)
     {
-        //Log.d(TAG, location.toString());
+
+        if (location.hasAccuracy())
+        {
+            Log.d(TAG, "accuracy " + location.getAccuracy());
+        }
         //SoundPlayer.vibrate(500, this.getActivity());
         SoundPlayer.makeNotificationSound(this.getActivity());
 
@@ -319,55 +391,6 @@ public class MyMapFragment extends Fragment
             locations.add(currentLocation);
         }
         this.drawPolyline();
-
-
-/*
-        //Get the current Latitude and Longitude of the location
-        double currentLatitude = location.getLatitude();
-        double currentLongitude = location.getLongitude();
-
-        //the distance between the last location and current one
-        float disRecentPoints = 0.0f;
-
-        //Create a LatLng object from our new location
-        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
-
-        MarkerOptions options = options = new MarkerOptions()
-                .position(latLng)
-                .title("You are here! ");
-        options.icon(BitmapDescriptorFactory
-                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-
-        //Check if we can start comparing the distance between points
-        if (locations.size() >= 1)
-        {
-            disRecentPoints = location.distanceTo(locations.getLast());
-            Toast.makeText(this.getActivity().getApplicationContext(),
-                    "Distance: " + disRecentPoints,
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        //Check if we are supposed to track the route
-        if (trackRoute)
-        {
-
-            this.markMap(disRecentPoints, latLng);
-
-            startPostion = googleMap.addMarker(startPostionMarkerOptions);
-
-            if (endPostionMarkerOptions != null)
-            {
-                endPostion = googleMap.addMarker(endPostionMarkerOptions);
-            }
-
-            locations.add(location);
-
-            this.drawPolyline();
-        }
-        googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));*/
-        ///googleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
     }
 
     private void updateCurrentLocationMarker()
@@ -397,7 +420,8 @@ public class MyMapFragment extends Fragment
         }
         SoundPlayer.vibrate(500, this.getActivity());
         //Toast for when we get a new location
-        //Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",
+        // Toast.LENGTH_SHORT).show();
     }
 
     private void setStartPostion()
@@ -407,9 +431,9 @@ public class MyMapFragment extends Fragment
                 "Set Start Point",
                 Toast.LENGTH_SHORT).show();
 
-        if (startPostion != null)
+        if (startPosition != null)
         {
-           startPostion.remove();
+            startPosition.remove();
         }
         if (myCurrentLocation != null)
         {
@@ -435,9 +459,9 @@ public class MyMapFragment extends Fragment
         Toast.makeText(this.getActivity().getApplicationContext(),
                 "Set End Point",
                 Toast.LENGTH_SHORT).show();
-        if (endPostion != null)
+        if (endPosition != null)
         {
-            endPostion.remove();
+            endPosition.remove();
         }
         if (myCurrentLocation != null)
         {
@@ -455,55 +479,6 @@ public class MyMapFragment extends Fragment
         points.add(currentLatLng);
         locations.add(currentLocation);
     }
-
-/*
-    private void markMap(float disRecentPoints, LatLng latLng)
-    {
-        //Marker for new location
-        MarkerOptions options;
-
-        //Check if its the start marker
-        if (firstMarker)
-        {
-            startPostionMarkerOptions = new MarkerOptions()
-                    .position(latLng)
-                    .title("Start");
-            startPostionMarkerOptions.icon(
-                    BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            //Add the latlng object to a the linkedlist of points
-            points.add(latLng);
-            firstMarker = false;
-        }
-        else if (lastMarker)
-        {
-            endPostionMarkerOptions = new MarkerOptions()
-                    .position(latLng)
-                    .title("Finish");
-            endPostionMarkerOptions.icon(BitmapDescriptorFactory
-                    .defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            //Add the latlng object to a the linkedlist of points
-            //points.add(latLng);
-            trackRoute = false;
-        }
-        else if (disRecentPoints >= 2.0f && disRecentPoints <= 60.0f)
-        {
-            SoundPlayer.vibrate(750, this.getActivity());
-            if (track % 5 == 0)
-            {
-                options = new MarkerOptions()
-                        .position(latLng)
-                        .title("I am here! " + track);
-                options.icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                //Add the latlng object to a the linkedlist of points
-                googleMap.addMarker(options);
-            }
-            points.add(latLng);
-            track++;
-        }
-    }*/
-
 
     /**
      * drawPolyline - draws the polyline of the users route
@@ -528,6 +503,14 @@ public class MyMapFragment extends Fragment
 
         return distance;
     }
+
+/*    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
+        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
+        savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
+
+        super.onSaveInstanceState(savedInstanceState);
+    }*/
 
 }
 
