@@ -93,7 +93,7 @@ public class LocationProvider extends Service implements LocationListener
     public void onLocationChanged(Location newLocation)
     {
         Log.v(TAG, "Location Changed");
-        myMapFragment.handleNewLocation(newLocation);
+        //myMapFragment.handleNewLocation(newLocation);
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras)
@@ -135,7 +135,7 @@ public class LocationProvider extends Service implements LocationListener
                     Bundle b = intent.getExtras();
                     double lng = b.getDouble("LNG");
                     double lat = b.getDouble("LAT");
-                    myMapFragment.goToLocation(lat, lng);
+                    //myMapFragment.goToLocation(lat, lng);
 
                 }//end if
 

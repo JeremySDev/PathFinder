@@ -26,6 +26,7 @@
     <string name="gps_network_not_enabled">GPS network not enabled</string>
     <string name="open_location_settings">Open location settings</string>
     <string name="cancel">Cancel</string>
+    <string name="service_name">my_location_service</string>
 
     <string-array name="marker_colors">
         <item>Azure</item>

@@ -25,7 +25,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Vibrator;
 
 import java.io.IOException;
 
@@ -170,7 +169,7 @@ public class SoundPlayer
      * Makes the phone vibrate for the specfied time providing the vibrate
      * permissions are enabled in the manifest.
      */
-    public static void vibrate(int timeMs, Context context)
+    /*public static void vibrate(int timeMs, Context context)
     {
 
         //Context context = AppConstraints.getInstance();
@@ -183,5 +182,5 @@ public class SoundPlayer
         {
             e.printStackTrace();
         }//end catch
-    }//======================================================================
+    }*///======================================================================
 }//#####################################################################

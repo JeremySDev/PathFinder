@@ -1,6 +1,9 @@
 package cs497.cs.wcu.edu.pathfinder;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -13,12 +16,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -61,7 +62,7 @@ public class MyMapFragment extends Fragment
     private float routeDistance = 0.0f;
     private Location lastLocation;
 
-    private LocationProvider locationProvider;
+    //private LocationProvider locationProvider;
 
     /**
      * The map has run once *
@@ -69,6 +70,8 @@ public class MyMapFragment extends Fragment
     boolean runOnce = true;
     boolean firstLocate = true;
     boolean stopPressed = true;
+
+    Context context;
 
 
     Marker myCurrentLocation;
@@ -84,7 +87,14 @@ public class MyMapFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        locationProvider = new LocationProvider(this.getActivity(), this);
+        context = this.getActivity();
+        // use this to start and trigger a service
+        Intent i = new Intent(context, MyLocationService.class);
+        // potentially add data to the intent
+        //i.putExtra("KEY1", "Value to be used by the service");
+        context.startService(i);
+
+        ///locationProvider = new LocationProvider(this.getActivity(), this);
         this.setHasOptionsMenu(true);
 
         //mLocationProvider = new LocationProvider(this.getActivity(), this);
@@ -129,19 +139,19 @@ public class MyMapFragment extends Fragment
             googleMap = fragment.getMap();
         }
         googleMap.setMyLocationEnabled(true);
-        if (runOnce)
+/*        if (runOnce)
         {
             locationProvider.onStartMap(googleMap);
             runOnce = false;
-        }
+        }*/
         /////////////////////////////////////
         //REGISTERING THE BROADCAST RECEIVER
         ////////////////////////////////////////
-        //IntentFilter filter = new IntentFilter();
-        //filter.addAction(AppConstraints.LOCATION_BROADCAST);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstraints.LOCATION_BROADCAST);
         //filter.addAction(AppConstraints.BROADCAST_TWO);
         //filter.addAction(AppConstraints.BROADCAST_THREE);
-        //this.getActivity().registerReceiver(locationProvider.receiver, filter);
+        this.getActivity().registerReceiver(receiver, filter);
     }
 
 
@@ -153,12 +163,12 @@ public class MyMapFragment extends Fragment
         //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
     }
 
-    /**
-     * Go to new location.
-     *
-     * @param lat The latitude to display.
-     * @param lng The longitude to display
-     */
+   /* *//**
+ * Go to new location.
+ *
+ * @param lat The latitude to display.
+ * @param lng The longitude to display
+ *//*
     public void goToLocation(double lat, double lng)
     {
 
@@ -166,13 +176,15 @@ public class MyMapFragment extends Fragment
         //this.goToLocation(lat, lng, 17);
     }
 
+    */
+
     /**
      * Go to new location.
      *
      * @param lat  The latitude to display.
      * @param lng  The longitude to display
      * @param zoom The zoom level of the application.
-     */
+     *//*
     public void goToLocation(double lat, double lng, int zoom)
     {
         //Create a new latlng object from the lat and lng double params
@@ -191,8 +203,7 @@ public class MyMapFragment extends Fragment
         //Position and zoom camera;
         googleMap.animateCamera(center);
         googleMap.moveCamera(center);
-    }
-
+    }*/
     public String markersToXML()
     {
         StringBuilder sb = new StringBuilder("");
@@ -346,20 +357,19 @@ public class MyMapFragment extends Fragment
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        this.goToLocation(lat, lng);
+        //this.goToLocation(lat, lng);
     }
 
-    public void handleNewLocation(Location location)
+    public void handleNewLocation(double latitude, double longitude, Location location)
     {
+        currentLocation = location;
 
         if (location.hasAccuracy())
         {
-            Log.d(TAG, "accuracy " + location.getAccuracy());
+            Log.d(TAG, "accuracy " + currentLocation.getAccuracy());
         }
         //SoundPlayer.vibrate(500, this.getActivity());
         SoundPlayer.makeNotificationSound(this.getActivity());
-
-        currentLocation = location;
 
         //Get the current Latitude and Longitude of the location
         double currentLatitude = currentLocation.getLatitude();
@@ -374,7 +384,7 @@ public class MyMapFragment extends Fragment
 
         if (locations.size() >= 1)
         {
-            disRecentPoints = location.distanceTo(locations.getLast());
+            disRecentPoints = currentLocation.distanceTo(locations.getLast());
             Toast.makeText(this.getActivity().getApplicationContext(),
                     "Distance: " + disRecentPoints,
                     Toast.LENGTH_SHORT).show();
@@ -395,8 +405,6 @@ public class MyMapFragment extends Fragment
 
     private void updateCurrentLocationMarker()
     {
-
-
         MarkerOptions options = options = new MarkerOptions()
                 .position(currentLatLng)
                 .title("You are here! ");
@@ -418,7 +426,7 @@ public class MyMapFragment extends Fragment
             googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));
             firstLocate = false;
         }
-        SoundPlayer.vibrate(500, this.getActivity());
+        //SoundPlayer.vibrate(500, this.getActivity());
         //Toast for when we get a new location
         //Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",
         // Toast.LENGTH_SHORT).show();
@@ -487,7 +495,7 @@ public class MyMapFragment extends Fragment
     {
         PolylineOptions po = new PolylineOptions();
         po.addAll(points);
-        po.color(Color.GREEN);
+        po.color(Color.CYAN);
         po.width(20.0f);
         route = googleMap.addPolyline(po);
     }
@@ -504,34 +512,37 @@ public class MyMapFragment extends Fragment
         return distance;
     }
 
-/*    public void onSaveInstanceState(Bundle savedInstanceState) {
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+            Log.v("RECEIVE","I Received " + action);
+            if (action.equals(AppConstraints.LOCATION_BROADCAST))
+            {
+                if (intent.getExtras() != null)
+                {
+                    Bundle b = intent.getExtras();
+                    double longitude = b.getDouble("Longitude");
+                    double latitude = b.getDouble("Latitude");
+                    Location location = (Location) b.get("Location");
+
+                    handleNewLocation(latitude, longitude, location);
+
+                }
+            }
+        }
+    };
+
+    /*
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
         savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
         savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
-
         super.onSaveInstanceState(savedInstanceState);
-    }*/
+    }
+    */
 
 }
-
-//        geo fix -83.182322 35.303268
-//        geo fix -83.182631 35.310450
-//        geo fix -83.182171 35.311357
-//        geo fix -83.183470 35.310517
-//        geo fix -83.181227 35.311235
-//        geo fix -83.179745 35.313028
-//        geo fix -83.181263 35.311295
-//        geo fix -83.182494 35.305279
-//        geo fix -83.183028 35.310717
-//        geo fix -83.182880 35.307502
-//        geo fix -83.183000 35.311440
-//        geo fix -83.186424 35.309005
-//        geo fix -83.186963 35.306355
-//        geo fix -83.186638 35.310464
-//        geo fix -83.184431 35.307116
-//        geo fix -83.183299 35.309418
-//        geo fix -83.182575 35.310000
-//        geo fix -83.178967 35.311339
-//        geo fix -83.181435 35.301412
-//        geo fix -83.186925 35.309188
-
