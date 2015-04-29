@@ -43,10 +43,8 @@ public class MyLocationService extends Service implements LocationListener
         // 10 meters
         int minDist = 10;
 
-        locationManager
-                .requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
-        locationManager
-                .requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, TWO_MINUTES, minDist, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWO_MINUTES, minDist, this);
         return Service.START_NOT_STICKY;
     }
 

@@ -37,7 +37,7 @@ import java.io.IOException;
 public class SoundPlayer
 {
 
-    public static final int SOUND_BLIP1 = R.raw.blip1;//Woowap - High frq
+    /*public static final int SOUND_BLIP1 = R.raw.blip1;//Woowap - High frq
     public static final int SOUND_BLIP2 = R.raw.blip2;//Woowap - Low frq
     public static final int SOUND_BLIP3 = R.raw.blip3;//Didle-de
     public static final int SOUND_BLIP4 = R.raw.blip4;//beep beep
@@ -52,7 +52,7 @@ public class SoundPlayer
     public static final int SOUND_BUS_STOP = R.raw.bus;
     public static final int SOUND_SPEAK_NOW = R.raw.speak_now;
     public static final int SOUND_PROC_SOUND = R.raw.proc_sound2;
-    public static final int SOUND_PROC_SOUND1 = R.raw.proc_sound1;
+    public static final int SOUND_PROC_SOUND1 = R.raw.proc_sound1;*/
 
     private static MediaPlayer mp;
 

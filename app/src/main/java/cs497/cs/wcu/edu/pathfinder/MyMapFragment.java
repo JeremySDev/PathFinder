@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -53,7 +54,7 @@ public class MyMapFragment extends Fragment
     public GoogleMap googleMap;
     private LinkedList<LatLng> points = new LinkedList<>();
     private LinkedList<Location> locations = new LinkedList<>();
-    private static Marker startPosition;
+    private Marker startPosition;
     private Marker endPosition;
     private MarkerOptions startPostionMarkerOptions;
     private MarkerOptions endPostionMarkerOptions;
@@ -73,6 +74,7 @@ public class MyMapFragment extends Fragment
 
     Context context;
 
+    ImageView record;
 
     Marker myCurrentLocation;
 
@@ -87,6 +89,8 @@ public class MyMapFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+
         context = this.getActivity();
         // use this to start and trigger a service
         Intent i = new Intent(context, MyLocationService.class);
@@ -109,6 +113,7 @@ public class MyMapFragment extends Fragment
         {
             rootView = inflater.inflate(R.layout.activity_maps, container, false);
         }
+        record = (ImageView) rootView.findViewById(R.id.imageView);
         return rootView;
     }
 
@@ -117,6 +122,7 @@ public class MyMapFragment extends Fragment
     {
         super.onActivityCreated(savedInstanceState);
         Log.v(TAG, "onActivityCreated called");
+
 
         //Find our map fragment
         FragmentManager fm = getChildFragmentManager();
@@ -127,6 +133,14 @@ public class MyMapFragment extends Fragment
         {
             fragment = SupportMapFragment.newInstance();
             fm.beginTransaction().replace(R.id.map, fragment).commit();
+        }
+
+        if (savedInstanceState != null)
+        {
+            double savedLat = savedInstanceState.getDouble("CurrentLatitude");
+            double savedLng = savedInstanceState.getDouble("CurrentLongitude");
+            this.currentLatLng = new LatLng(savedLat, savedLng);
+            this.updateCurrentLocationMarker();
         }
     }
 
@@ -139,11 +153,6 @@ public class MyMapFragment extends Fragment
             googleMap = fragment.getMap();
         }
         googleMap.setMyLocationEnabled(true);
-/*        if (runOnce)
-        {
-            locationProvider.onStartMap(googleMap);
-            runOnce = false;
-        }*/
         /////////////////////////////////////
         //REGISTERING THE BROADCAST RECEIVER
         ////////////////////////////////////////
@@ -160,6 +169,7 @@ public class MyMapFragment extends Fragment
     {
         Log.v(TAG, "On Pause Called");
         super.onPause();
+        this.getActivity().unregisterReceiver(receiver);
         //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
     }
 
@@ -287,6 +297,7 @@ public class MyMapFragment extends Fragment
                     trackRoute = true;
                     this.setStartPostion();
                     stopPressed = false;
+                    record.setVisibility(View.VISIBLE);
                 }
                 else
                 {
@@ -360,7 +371,7 @@ public class MyMapFragment extends Fragment
         //this.goToLocation(lat, lng);
     }
 
-    public void handleNewLocation(double latitude, double longitude, Location location)
+    public void handleNewLocation(Location location)
     {
         currentLocation = location;
 
@@ -416,6 +427,18 @@ public class MyMapFragment extends Fragment
             myCurrentLocation.remove();
         }
 
+        if (myCurrentLocation == null )
+        {
+            Log.v("NULL", "locat");
+        }
+        if (googleMap == null )
+        {
+            Log.v("NULL", "map");
+        }
+        if (options == null )
+        {
+            Log.v("NULL", "options");
+        }
         myCurrentLocation = googleMap.addMarker(options);
 
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
@@ -455,7 +478,7 @@ public class MyMapFragment extends Fragment
                 BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
-        googleMap.addMarker(startPostionMarkerOptions);
+        startPosition = googleMap.addMarker(startPostionMarkerOptions);
         //Add the latlng object to a the linkedlist of points
         points.add(currentLatLng);
         locations.add(currentLocation);
@@ -482,7 +505,7 @@ public class MyMapFragment extends Fragment
         endPostionMarkerOptions.icon(
                 BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
-        googleMap.addMarker(endPostionMarkerOptions);
+        endPosition = googleMap.addMarker(endPostionMarkerOptions);
         //Add the latlng object to a the linkedlist of points
         points.add(currentLatLng);
         locations.add(currentLocation);
@@ -518,31 +541,39 @@ public class MyMapFragment extends Fragment
         public void onReceive(Context context, Intent intent)
         {
             String action = intent.getAction();
-            Log.v("RECEIVE","I Received " + action);
+            Log.v("RECEIVE", "I Received " + action);
             if (action.equals(AppConstraints.LOCATION_BROADCAST))
             {
                 if (intent.getExtras() != null)
                 {
                     Bundle b = intent.getExtras();
-                    double longitude = b.getDouble("Longitude");
-                    double latitude = b.getDouble("Latitude");
                     Location location = (Location) b.get("Location");
-
-                    handleNewLocation(latitude, longitude, location);
-
+                    handleNewLocation(location);
                 }
             }
         }
     };
 
-    /*
+
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
+        savedInstanceState.putDouble("CurrentLatitude", currentLocation.getLatitude());
+        savedInstanceState.putDouble("CurrentLongitude", currentLocation.getLongitude());
+        /*if (startPosition != null)
+        {
+            savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
+            savedInstanceState.putDouble("StartLongitude", currentLocation.getLongitude());
+        }
+        if (st != null)
+        {
+            savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
+            savedInstanceState.putDouble("StartLongitude", currentLocation.getLongitude());
+        }*/
+
+        //savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
+        //savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
         super.onSaveInstanceState(savedInstanceState);
     }
-    */
+
 
 }
