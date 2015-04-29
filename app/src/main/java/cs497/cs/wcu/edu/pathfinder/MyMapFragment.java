@@ -114,6 +114,7 @@ public class MyMapFragment extends Fragment
             rootView = inflater.inflate(R.layout.activity_maps, container, false);
         }
         record = (ImageView) rootView.findViewById(R.id.imageView);
+        firstLocate = true;
         return rootView;
     }
 
@@ -151,8 +152,9 @@ public class MyMapFragment extends Fragment
         if (googleMap == null)
         {
             googleMap = fragment.getMap();
+            googleMap.setMyLocationEnabled(true);
         }
-        googleMap.setMyLocationEnabled(true);
+
         /////////////////////////////////////
         //REGISTERING THE BROADCAST RECEIVER
         ////////////////////////////////////////
@@ -190,10 +192,6 @@ public class MyMapFragment extends Fragment
 
     /**
      * Go to new location.
-     *
-     * @param lat  The latitude to display.
-     * @param lng  The longitude to display
-     * @param zoom The zoom level of the application.
      *//*
     public void goToLocation(double lat, double lng, int zoom)
     {
@@ -389,6 +387,15 @@ public class MyMapFragment extends Fragment
         //Create a LatLng object from our new location
         currentLatLng = new LatLng(currentLatitude, currentLongitude);
 
+        googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+
+        if (googleMap.getCameraPosition().zoom != 17)
+        {
+            googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+            firstLocate = false;
+        }
+
         this.updateCurrentLocationMarker();
 
         float disRecentPoints = 0.0f;
@@ -427,18 +434,6 @@ public class MyMapFragment extends Fragment
             myCurrentLocation.remove();
         }
 
-        if (myCurrentLocation == null )
-        {
-            Log.v("NULL", "locat");
-        }
-        if (googleMap == null )
-        {
-            Log.v("NULL", "map");
-        }
-        if (options == null )
-        {
-            Log.v("NULL", "options");
-        }
         myCurrentLocation = googleMap.addMarker(options);
 
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
