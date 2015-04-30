@@ -195,11 +195,11 @@ public class MyMapFragment extends Fragment
                 return true;
             //if the user pressed undo call the customViews undo method
             case R.id.action_stop:
-                stopPress(false);
+                stopPress();
                 return true;
             //if the user pressed clear call the customViews clearScreen method
             case R.id.action_save:
-                stopPress(true);
+                savePress();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -225,7 +225,7 @@ public class MyMapFragment extends Fragment
         }
     }
 
-    private void stopPress(boolean isSave)
+    private void stopPress()
     {
         if (!stopPressed)
         {
@@ -233,7 +233,7 @@ public class MyMapFragment extends Fragment
                     Toast.LENGTH_SHORT).show();
             this.setEndPostion();
             stopPressed = true;
-            record.setVisibility(View.VISIBLE);
+            record.setVisibility(View.INVISIBLE);
         }
         else
         {
@@ -242,6 +242,26 @@ public class MyMapFragment extends Fragment
                     Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void savePress()
+    {
+        FileHandler fileHandler;
+        if (!stopPressed)
+        {
+            stopPress();
+            fileHandler = new FileHandler(startPosition, endPosition, points);
+            fileHandler.openNameFileDialog();
+
+        }
+        else
+        {
+            Toast.makeText(this.getActivity().getApplicationContext(),
+                    "Start Recording Route First",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 
     public String routeToXML()
     {
