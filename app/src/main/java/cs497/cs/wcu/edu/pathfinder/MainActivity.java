@@ -1,6 +1,7 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -34,8 +36,6 @@ public class MainActivity extends ActionBarActivity
 
     String tag = "IS EMPTY";
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -57,6 +57,8 @@ public class MainActivity extends ActionBarActivity
 
         dirEmpty = AppConstraints.isDirEmpty(this.getApplicationContext());
 
+
+
     }
 
 
@@ -72,11 +74,11 @@ public class MainActivity extends ActionBarActivity
 
         if (position == 0)
         {
-            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.container, fileLoadFragment).commit();
         }
         if (position == 1)
         {
-            fragmentManager.beginTransaction().replace(R.id.container, fileLoadFragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
         }
         if (position == 2)
         {

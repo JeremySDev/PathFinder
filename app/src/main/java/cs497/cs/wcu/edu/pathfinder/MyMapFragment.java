@@ -93,13 +93,14 @@ public class MyMapFragment extends Fragment
 
         context = this.getActivity();
         // use this to start and trigger a service
-        Intent i = new Intent(context, MyLocationService.class);
-        // potentially add data to the intent
-        //i.putExtra("KEY1", "Value to be used by the service");
-        context.startService(i);
+
 
         ///locationProvider = new LocationProvider(this.getActivity(), this);
         this.setHasOptionsMenu(true);
+
+        Intent i = new Intent(context, MyLocationService.class);
+        context.startService(i);
+        Toast.makeText(context, "Service Started", Toast.LENGTH_LONG).show();
 
         //mLocationProvider = new LocationProvider(this.getActivity(), this);
     }
@@ -175,44 +176,74 @@ public class MyMapFragment extends Fragment
         //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
     }
 
-   /* *//**
- * Go to new location.
- *
- * @param lat The latitude to display.
- * @param lng The longitude to display
- *//*
-    public void goToLocation(double lat, double lng)
+    /**
+     * onOptionsItemSelected - determines what happens when a user clicks on a menu item
+     *
+     * @param item the item the user selected.
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
     {
 
-        //SoundPlayer.makeSound(SoundPlayer.SOUND_PROC_SOUND);
-        //this.goToLocation(lat, lng, 17);
+        switch (item.getItemId())
+        {
+            //if the user picked save open the name file dialog
+            //handle pressing dialog twice
+            case R.id.action_record:
+                recordPress();
+                return true;
+            //if the user pressed undo call the customViews undo method
+            case R.id.action_stop:
+                stopPress(false);
+                return true;
+            //if the user pressed clear call the customViews clearScreen method
+            case R.id.action_save:
+                stopPress(true);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
-    */
-
-    /**
-     * Go to new location.
-     *//*
-    public void goToLocation(double lat, double lng, int zoom)
+    private void recordPress()
     {
-        //Create a new latlng object from the lat and lng double params
-        LatLng location = new LatLng(lat, lng);
+        if (stopPressed)
+        {
+            Toast.makeText(this.getActivity().getApplicationContext(), "Record",
+                    Toast.LENGTH_SHORT).show();
+            trackRoute = true;
+            this.setStartPostion();
+            stopPressed = false;
+            record.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            Toast.makeText(this.getActivity().getApplicationContext(),
+                    "Press Stop Recording First",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        //Setup how the user will view the map
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(location) // Sets the center of the map to Mountain View
-                .zoom(zoom)       // Sets the zoom
-                .bearing(90)      // Sets the orientation of the camera to east
-                .tilt(0)          // tilt 0 degrees
-                .build();         // Creates a CameraPosition from the builder
+    private void stopPress(boolean isSave)
+    {
+        if (!stopPressed)
+        {
+            Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
+                    Toast.LENGTH_SHORT).show();
+            this.setEndPostion();
+            stopPressed = true;
+            record.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            Toast.makeText(this.getActivity().getApplicationContext(),
+                    "Start Recording Route First",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
 
-        CameraUpdate center = CameraUpdateFactory.newCameraPosition(cameraPosition);
-
-        //Position and zoom camera;
-        googleMap.animateCamera(center);
-        googleMap.moveCamera(center);
-    }*/
-    public String markersToXML()
+    public String routeToXML()
     {
         StringBuilder sb = new StringBuilder("");
         sb.append("<route>\n");
@@ -261,75 +292,12 @@ public class MyMapFragment extends Fragment
             //Get the map markers from the handler.
             //mapMarkers = handler.getMapMarkers();
         }
-        catch (ParserConfigurationException e)
-        {
-            Toast.makeText(this.getActivity(), "Error reading xml file.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        catch (SAXException e)
+        catch (ParserConfigurationException | SAXException e)
         {
             Toast.makeText(this.getActivity(), "Error reading xml file.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
-
-    /**
-     * onOptionsItemSelected - determines what happens when a user clicks on a menu item
-     *
-     * @param item the item the user selected.
-     * @return
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-
-        switch (item.getItemId())
-        {
-            //if the user picked save open the name file dialog
-            //handle pressing dialog twice
-            case R.id.action_record:
-                if (stopPressed)
-                {
-                    Toast.makeText(this.getActivity().getApplicationContext(), "Record",
-                            Toast.LENGTH_SHORT).show();
-                    trackRoute = true;
-                    this.setStartPostion();
-                    stopPressed = false;
-                    record.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    Toast.makeText(this.getActivity().getApplicationContext(),
-                            "Press Stop Recording First",
-                            Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            //if the user pressed undo call the customViews undo method
-            case R.id.action_stop:
-                if (!stopPressed)
-                {
-                    Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
-                            Toast.LENGTH_SHORT).show();
-                    this.setEndPostion();
-                    stopPressed = true;
-                }
-                else
-                {
-                    Toast.makeText(this.getActivity().getApplicationContext(),
-                            "Start Recording Route First",
-                            Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            //if the user pressed clear call the customViews clearScreen method
-            case R.id.action_save:
-                Toast.makeText(this.getActivity().getApplicationContext(), "Save",
-                        Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
 
     /**
      * goToLastFix - finds the users last fixed location.
@@ -479,7 +447,6 @@ public class MyMapFragment extends Fragment
         locations.add(currentLocation);
     }
 
-
     private void setEndPostion()
     {
         Toast.makeText(this.getActivity().getApplicationContext(),
@@ -550,10 +517,14 @@ public class MyMapFragment extends Fragment
     };
 
 
-    public void onSaveInstanceState(Bundle savedInstanceState)
+   /* public void onSaveInstanceState(Bundle savedInstanceState)
     {
-        savedInstanceState.putDouble("CurrentLatitude", currentLocation.getLatitude());
-        savedInstanceState.putDouble("CurrentLongitude", currentLocation.getLongitude());
+        if (currentLocation != null)
+        {
+
+            savedInstanceState.putDouble("CurrentLatitude", currentLocation.getLatitude());
+            savedInstanceState.putDouble("CurrentLongitude", currentLocation.getLongitude());
+        }
         /*if (startPosition != null)
         {
             savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
@@ -563,12 +534,9 @@ public class MyMapFragment extends Fragment
         {
             savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
             savedInstanceState.putDouble("StartLongitude", currentLocation.getLongitude());
-        }*/
-
-        //savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        //savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
+        }
         super.onSaveInstanceState(savedInstanceState);
-    }
+    }*/
 
 
 }
