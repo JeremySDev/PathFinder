@@ -66,9 +66,7 @@ public class MainActivity extends ActionBarActivity
     public void onResume()
     {
         super.onResume();
-        //////////////////////////////////////////
-        //REGISTERING THE BROADCAST RECEIVER
-        ////////////////////////////////////////
+        //register the broadcast receiver
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstraints.TAB_BROADCAST);
         this.registerReceiver(tab_receiver, filter);
@@ -89,7 +87,6 @@ public class MainActivity extends ActionBarActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fileLoadFragment = new FileLoadFragment();
         Fragment mapFragment = new MyMapFragment();
-        Fragment optionsFragment = new OptionsFragment();
 
         if (position == 0)
         {
@@ -98,10 +95,6 @@ public class MainActivity extends ActionBarActivity
         if (position == 1)
         {
             fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
-        }
-        if (position == 2)
-        {
-            fragmentManager.beginTransaction().replace(R.id.container, optionsFragment).commit();
         }
     }
 
@@ -114,9 +107,6 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
                 break;
         }
     }
@@ -224,17 +214,9 @@ public class MainActivity extends ActionBarActivity
             {
                 AppConstraints.loadMap = true;
                 fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
-                sendFragChangeBroadcast();
+
             }
         }
     };
-
-    public void sendFragChangeBroadcast()
-    {
-        //Send broadcast to Tab Screen to switch the tab
-        Intent i = new Intent();
-        i.setAction(AppConstraints.TAB_BROADCAST2);
-        this.sendBroadcast(i);
-    }
 }
 
