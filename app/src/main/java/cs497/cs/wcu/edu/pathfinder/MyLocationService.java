@@ -4,12 +4,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-import android.location.LocationListener;
 
 /**
  * @author Jeremy Stilwell
@@ -41,11 +41,11 @@ public class MyLocationService extends Service implements LocationListener
         // 5 miliseconds
         int minTime = 5000;
         // 10 meters
-        int minDist = 1;
+        int minDist = 10;
 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
-        return Service.START_NOT_STICKY;
+        return Service.START_STICKY;
     }
 
     @Override
@@ -123,31 +123,9 @@ public class MyLocationService extends Service implements LocationListener
     @Override
     public void onDestroy()
     {
-        // handler.removeCallbacks(sendUpdatesToUI);
         super.onDestroy();
         Log.v("STOP_SERVICE", "DONE");
         locationManager.removeUpdates((LocationListener) this);
-    }
-
-    public static Thread performOnBackgroundThread(final Runnable runnable)
-    {
-        final Thread t = new Thread()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    runnable.run();
-                }
-                finally
-                {
-
-                }
-            }
-        };
-        t.start();
-        return t;
     }
 
     /*public class MyLocationListener implements LocationListener
@@ -159,18 +137,11 @@ public class MyLocationService extends Service implements LocationListener
 
         if (isBetterLocation(loc, previousBestLocation))
         {
-            //loc.getLatitude();
-            //loc.getLongitude();
             intent.putExtra("Latitude", loc.getLatitude());
             intent.putExtra("Longitude", loc.getLongitude());
             intent.putExtra("Provider", loc.getProvider());
             intent.putExtra("Location", loc);
             sendBroadcast(intent);
-            /*if ((i % 5) == 0)
-            {
-                Toast.makeText(getApplicationContext(), "Broadcast: " + i, Toast.LENGTH_SHORT)
-                        .show();
-            }*/
             i++;
         }
     }

@@ -10,7 +10,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,14 +25,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.StringReader;
 import java.util.LinkedList;
 
 
@@ -44,45 +36,68 @@ import java.util.LinkedList;
  */
 public class MyMapFragment extends Fragment
 {
-    public static final String TAG = MyMapFragment.class.getSimpleName();
-    private static int track = 0;
-    private static boolean firstMarker = true;
-    private static boolean lastMarker = false;
     View rootView = null;
 
+    /* Represents the map in our view*/
     public SupportMapFragment fragment;
+
+    /* The map made from the fragment*/
     public GoogleMap googleMap;
+
+    /* points in the users route */
     private LinkedList<LatLng> points = new LinkedList<>();
+
+    /* locations in the users route */
     private LinkedList<Location> locations = new LinkedList<>();
+
+    /* Marker representing the user starting location */
     private Marker startPosition;
+
+    /* Marker representing the user ending location */
     private Marker endPosition;
+
+    /* MarkerOptions for the startPositionMarker */
     private MarkerOptions startPostionMarkerOptions;
+
+    /* MarkerOptions for the endPositionMarker */
     private MarkerOptions endPostionMarkerOptions;
+
+    /* Polyline that shows the users path */
     private Polyline route;
+
+    /* Whether or not to track the users route */
     private boolean trackRoute = false;
+
+    /* The distance of a users route */
     private float routeDistance = 0.0f;
-    private Location lastLocation;
 
-    //private LocationProvider locationProvider;
+    /* The map has run once */
+    private boolean firstLocate = true;
 
-    /**
-     * The map has run once *
-     */
-    boolean runOnce = true;
-    boolean firstLocate = true;
-    boolean stopPressed = true;
-    boolean recPressed = true;
+    /* Whether or not stop has been pressed */
+    private boolean stopPressed = true;
 
+    /* Whether or not record has been pressed */
+    private boolean recPressed = true;
 
-    Context context;
+    /* A context object for the map class to use */
+    private Context context;
 
-    ImageView record;
+    /* Image view for the record image */
+    private ImageView record;
 
-    Marker myCurrentLocation;
+    /* A marker for the users current position */
+    private Marker myCurrentLocation;
 
-    Location currentLocation;
+    /* A location for the users current position */
+    private Location currentLocation;
 
-    LatLng currentLatLng;
+    /* A LatLng for the user current position */
+    private LatLng currentLatLng;
+
+    /* Whether or not record has been pressed */
+    private boolean runOnce = false;
+
 
     /**
      * Does the initial creation of the fragment*
@@ -91,20 +106,17 @@ public class MyMapFragment extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-
-
+        //init context
         context = this.getActivity();
-        // use this to start and trigger a service
 
-
-        ///locationProvider = new LocationProvider(this.getActivity(), this);
+        //Set that we can use teh options menu
         this.setHasOptionsMenu(true);
 
+        //Create an intent from our location service
         Intent i = new Intent(context, MyLocationService.class);
-        context.startService(i);
-        Toast.makeText(context, "Service Started", Toast.LENGTH_LONG).show();
 
-        //mLocationProvider = new LocationProvider(this.getActivity(), this);
+        //Start the location service
+        context.startService(i);
     }
 
     @Override
@@ -116,7 +128,9 @@ public class MyMapFragment extends Fragment
         {
             rootView = inflater.inflate(R.layout.activity_maps, container, false);
         }
+        //Init teh image view with the one in our view
         record = (ImageView) rootView.findViewById(R.id.imageView);
+        //is the first time locating
         firstLocate = true;
         return rootView;
     }
@@ -125,8 +139,6 @@ public class MyMapFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
-        Log.v(TAG, "onActivityCreated called");
-
 
         //Find our map fragment
         FragmentManager fm = getChildFragmentManager();
@@ -139,47 +151,55 @@ public class MyMapFragment extends Fragment
             fm.beginTransaction().replace(R.id.map, fragment).commit();
         }
 
-        if (savedInstanceState != null)
-        {
-            double savedLat = savedInstanceState.getDouble("CurrentLatitude");
-            double savedLng = savedInstanceState.getDouble("CurrentLongitude");
-            this.currentLatLng = new LatLng(savedLat, savedLng);
-            this.updateCurrentLocationMarker();
-        }
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
+        //if map is null initialize it
         if (googleMap == null)
         {
             googleMap = fragment.getMap();
-            googleMap.getUiSettings().setZoomGesturesEnabled(false);
+            //googleMap.getUiSettings().setZoomGesturesEnabled(false);
         }
 
-        /////////////////////////////////////
-        //REGISTERING THE BROADCAST RECEIVER
-        ////////////////////////////////////////
+        // register our broadcast receiver and give it an intent filter
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstraints.LOCATION_BROADCAST);
-        //filter.addAction(AppConstraints.BROADCAST_TWO);
-        //filter.addAction(AppConstraints.BROADCAST_THREE);
         this.getActivity().registerReceiver(receiver, filter);
+
+        //Check if we need to load a users saved route
         if (AppConstraints.loadMap)
         {
             loadPoints(AppConstraints.points);
+            AppConstraints.loadMap = false;
+        }
+
+        if (!runOnce)
+        {
+            this.goToLastFix();
+            runOnce = true;
         }
     }
 
     @Override
     public void onPause()
     {
-        Log.v(TAG, "On Pause Called");
         super.onPause();
-        this.getActivity().unregisterReceiver(receiver);
-        //SoundPlayer.makeSound(SoundPlayer.SOUND_BLIP6);
+        //unregister receiver
+        //this.getActivity().unregisterReceiver(receiver);
     }
+
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        //unregister receiver
+        this.getActivity().unregisterReceiver(receiver);
+    }
+
 
     /**
      * onOptionsItemSelected - determines what happens when a user clicks on a menu item
@@ -211,35 +231,51 @@ public class MyMapFragment extends Fragment
         }
     }
 
+    /**
+     * recordPress - called when the user presses record. Only runs if the user isn't already
+     * recording. Tells the map to track users route, sets the start position of the route and makes
+     * the imageview visible.
+     */
     private void recordPress()
     {
+        //Only start recording if not already recording
         if (stopPressed)
         {
-            Toast.makeText(this.getActivity().getApplicationContext(), "Record",
-                    Toast.LENGTH_SHORT).show();
+            //Track the users route
             trackRoute = true;
+            //Set the users start position
             this.setStartPostion();
+            //Set stopped pressed to false
             stopPressed = false;
+            //Set recording pressed to true
             recPressed = true;
+            //Make the image view visible
             record.setVisibility(View.VISIBLE);
         }
         else
         {
             Toast.makeText(this.getActivity().getApplicationContext(),
-                    "Press Stop Recording First",
-                    Toast.LENGTH_SHORT).show();
+                    "Press Stop Recording First", Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * stopPress - called when the user presses stop. Only runs if the user is recording. Tells the
+     * map to stop tracking the users route, sets the end position of the route and make
+     * the imageview invisible.
+     */
     private void stopPress()
     {
+        //Check if we are recording
         if (!stopPressed)
         {
-            Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
-                    Toast.LENGTH_SHORT).show();
+            //Set the end position by adding a marker
             this.setEndPostion();
+            //Stop tracking the users location
             trackRoute = false;
+            //show that they did press stop
             stopPressed = true;
+            //set the image view to be invisible
             record.setVisibility(View.INVISIBLE);
         }
         else
@@ -250,71 +286,21 @@ public class MyMapFragment extends Fragment
         }
     }
 
+    /**
+     * savePress - called when the user presses save also calls the stopPressed method if the user
+     * didn't press stop
+     */
     private void savePress()
     {
         FileHandler fileHandler;
-        if (stopPressed || recPressed)
+        if (!stopPressed)
         {
             stopPress();
+        }
+        if (recPressed)
+        {
             fileHandler = new FileHandler(startPosition, endPosition, points, this.getActivity());
             fileHandler.openNameFileDialog();
-        }
-    }
-
-
-    public String routeToXML()
-    {
-        StringBuilder sb = new StringBuilder("");
-        sb.append("<route>\n");
-
-        sb.append("\t<startmarker>\n");
-        sb.append("\t\t<title>" + startPosition.getTitle() + "</title>\n");
-        sb.append("\t\t<lat>" + startPosition.getPosition().latitude + "</lat>\n");
-        sb.append("\t\t<lng>" + startPosition.getPosition().longitude + "</lat>\n");
-        sb.append("\t</startmarker>\n");
-
-        sb.append("\t<endmarker>\n");
-        sb.append("\t\t<title>" + endPosition.getTitle() + "</title>\n");
-        sb.append("\t\t<lat>" + endPosition.getPosition().latitude + "</lat>\n");
-        sb.append("\t\t<lng>" + endPosition.getPosition().longitude + "</lat>\n");
-        sb.append("\t</endmarker>\n");
-
-        sb.append("\t <points>\n");
-        for (LatLng latLng : points)
-        {
-            sb.append("\t\t<point>\n");
-            sb.append("\t\t\t<lat>" + latLng.latitude + "</lat>\n");
-            sb.append("\t\t\t<lng>" + latLng.longitude + "</lat>\n");
-            sb.append("\t\t</point>\n");
-        }//end for
-        sb.append("\t<points>\n");
-        sb.append("</route>\n");
-        return sb.toString();
-    }
-
-    public void parseXML(String rawXML)
-    {
-        Log.w("AndroidParseXMLActivity", "Start Parsing");
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        try
-        {
-            SAXParser saxParser = factory.newSAXParser();
-            XMLReader xmlreader = saxParser.getXMLReader();
-            MarkerXMLHandler handler = new MarkerXMLHandler();
-            xmlreader.setContentHandler(handler);
-            //myData = handler.getObjectList();
-            //Objects to read the stream.
-            InputSource inStream = new InputSource();
-            inStream.setCharacterStream(new StringReader(rawXML));
-            //Parse the input stream
-            //xmlreader.parse(inStream);
-            //Get the map markers from the handler.
-            //mapMarkers = handler.getMapMarkers();
-        }
-        catch (ParserConfigurationException | SAXException e)
-        {
-            Toast.makeText(this.getActivity(), "Error reading xml file.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
         }
     }
 
@@ -352,15 +338,18 @@ public class MyMapFragment extends Fragment
 
         double lat = location.getLatitude();
         double lng = location.getLongitude();
-
-        //this.goToLocation(lat, lng);
     }
 
+    /**
+     * handleNewLocation - called when the a broadcast is received from our location service.
+     * Handles the users new location by updating the current position marker and adding the point
+     * to the list of points if we are tracking the user's route.
+     *
+     * @param location - the users new location.
+     */
     public void handleNewLocation(Location location)
     {
         currentLocation = location;
-
-        SoundPlayer.makeNotificationSound(this.getActivity());
 
         //Get the current Latitude and Longitude of the location
         double currentLatitude = currentLocation.getLatitude();
@@ -369,38 +358,42 @@ public class MyMapFragment extends Fragment
         //Create a LatLng object from our new location
         currentLatLng = new LatLng(currentLatitude, currentLongitude);
 
+        //move the camera to the new position
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
 
+        //If the map is not zoomed in at 18 put it there
         if (googleMap.getCameraPosition().zoom != 18)
         {
             googleMap.moveCamera(CameraUpdateFactory.zoomTo(18));
             firstLocate = false;
         }
 
+        //Change the position of the current location marker to the new location
         this.updateCurrentLocationMarker();
 
+        //Distance between this point and the last one
         float disRecentPoints = 0.0f;
 
+        //Check that we have enough location objects to compare
         if (locations.size() >= 1)
         {
+            //get the distance between the most recent points
             disRecentPoints = currentLocation.distanceTo(locations.getLast());
         }
 
-        //Start location
+        //If were recording the user route add the location to that of the points
         if (trackRoute)
         {
+            /*//Check of the distance change is too great or small if so don't include the location
             if (disRecentPoints >= 5.0f && disRecentPoints <= 40.0f)
-            {
-                routeDistance += disRecentPoints;
-                Toast.makeText(this.getActivity().getApplicationContext(),
-                        "Distance: " + routeDistance, Toast.LENGTH_SHORT).show();
-                points.add(currentLatLng);
-                track++;
-            }
+            {*/
+
+            routeDistance += disRecentPoints;
+            points.add(currentLatLng);
             locations.add(currentLocation);
+            this.drawPolyline();
         }
-        this.drawPolyline();
     }
 
     private void updateCurrentLocationMarker()
