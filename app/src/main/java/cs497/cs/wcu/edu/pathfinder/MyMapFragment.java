@@ -385,9 +385,6 @@ public class MyMapFragment extends Fragment
         if (locations.size() >= 1)
         {
             disRecentPoints = currentLocation.distanceTo(locations.getLast());
-
-            Toast.makeText(this.getActivity().getApplicationContext(),
-                    "Distance: " + disRecentPoints, Toast.LENGTH_SHORT).show();
         }
 
         //Start location
@@ -396,6 +393,8 @@ public class MyMapFragment extends Fragment
             if (disRecentPoints >= 5.0f && disRecentPoints <= 40.0f)
             {
                 routeDistance += disRecentPoints;
+                Toast.makeText(this.getActivity().getApplicationContext(),
+                        "Distance: " + routeDistance, Toast.LENGTH_SHORT).show();
                 points.add(currentLatLng);
                 track++;
             }
