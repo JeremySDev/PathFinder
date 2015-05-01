@@ -298,7 +298,8 @@ public class MyMapFragment extends Fragment
         }
         if (recPressed)
         {
-            fileHandler = new FileHandler(startPosition, endPosition, points, this.getActivity());
+            fileHandler = new FileHandler(startPosition, endPosition, points, routeDistance,
+                    this.getActivity());
             fileHandler.openNameFileDialog();
         }
     }
@@ -495,6 +496,7 @@ public class MyMapFragment extends Fragment
 
     /**
      * addEndPoint - a marker to the map the end position of the route
+     *
      * @param currentLatLng the users current latlng
      */
     public void addEndPoint(LatLng currentLatLng)

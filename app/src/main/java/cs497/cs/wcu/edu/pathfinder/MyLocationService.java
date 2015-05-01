@@ -9,7 +9,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * @author Jeremy Stilwell
@@ -21,7 +20,7 @@ public class MyLocationService extends Service implements LocationListener
     private static final int TWO_MINUTES = 1000 * 60 * 2;
 
     public LocationManager locationManager;
-    //public LocationListener listener;
+
     public Location previousBestLocation = null;
 
     Intent intent;
@@ -30,12 +29,14 @@ public class MyLocationService extends Service implements LocationListener
     public void onCreate()
     {
         super.onCreate();
+        //give our intent an action
         intent = new Intent(AppConstraints.LOCATION_BROADCAST);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+        //Create a location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         // 5 miliseconds
@@ -43,8 +44,11 @@ public class MyLocationService extends Service implements LocationListener
         // 10 meters
         int minDist = 10;
 
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
+        //get location updates from the location manager
+        locationManager
+                .requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
+        locationManager
+                .requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
         return Service.START_STICKY;
     }
 
@@ -54,6 +58,13 @@ public class MyLocationService extends Service implements LocationListener
         return null;
     }
 
+    /**
+     * isBetterLocation - checks if the new location is better to use than the older location.
+     *
+     * @param location            old location
+     * @param currentBestLocation newer location
+     * @return which location is best to use
+     */
     protected boolean isBetterLocation(Location location, Location currentBestLocation)
     {
         if (currentBestLocation == null)
@@ -119,22 +130,21 @@ public class MyLocationService extends Service implements LocationListener
         return provider1.equals(provider2);
     }
 
-
     @Override
     public void onDestroy()
     {
         super.onDestroy();
         Log.v("STOP_SERVICE", "DONE");
-        locationManager.removeUpdates((LocationListener) this);
+        locationManager.removeUpdates(this);
     }
 
-    /*public class MyLocationListener implements LocationListener
-    {*/
-    int i = 0;
-
+    /**
+     * onLocationChanged - when the location is changed send the new location in a broadcast
+     *
+     * @param loc the new location
+     */
     public void onLocationChanged(final Location loc)
     {
-
         if (isBetterLocation(loc, previousBestLocation))
         {
             intent.putExtra("Latitude", loc.getLatitude());
@@ -142,25 +152,23 @@ public class MyLocationService extends Service implements LocationListener
             intent.putExtra("Provider", loc.getProvider());
             intent.putExtra("Location", loc);
             sendBroadcast(intent);
-            i++;
+            SoundPlayer.makeNotificationSound(this);
         }
     }
 
+    /* Required interface methods */
     public void onProviderDisabled(String provider)
     {
-        Toast.makeText(getApplicationContext(), "GPS Disabled", Toast.LENGTH_SHORT).show();
-    }
 
+    }
 
     public void onProviderEnabled(String provider)
     {
-        Toast.makeText(getApplicationContext(), "GPS Enabled", Toast.LENGTH_SHORT).show();
-    }
 
+    }
 
     public void onStatusChanged(String provider, int status, Bundle extras)
     {
         Log.v("StatChange", "Status Changed");
     }
-    //}
 }

@@ -39,6 +39,7 @@ public class CustomListAdapter extends ArrayAdapter<String>
                              ArrayList<String> datesOfRoutes, ArrayList<String> distances)
     {
         super(context, textViewResourceId, fileNames);
+        //init fields
         this.context = context;
 
         this.routeNames = fileNames;
@@ -50,7 +51,6 @@ public class CustomListAdapter extends ArrayAdapter<String>
 
     /**
      * Get the view at the given position in the list view.
-     * THIS IS OVERRIDEN FROM THR ARRAY ADAPTER CLASS.
      *
      * @param position     The position in the Array list of items which is to be rendered.
      * @param listItemView The layout view that defines the design and components of each list
