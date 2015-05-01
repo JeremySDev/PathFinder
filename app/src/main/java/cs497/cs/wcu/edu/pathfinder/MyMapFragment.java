@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -244,7 +243,7 @@ public class MyMapFragment extends Fragment
             //Track the users route
             trackRoute = true;
             //Set the users start position
-            this.setStartPostion();
+            this.setStartPosition();
             //Set stopped pressed to false
             stopPressed = false;
             //Set recording pressed to true
@@ -270,7 +269,7 @@ public class MyMapFragment extends Fragment
         if (!stopPressed)
         {
             //Set the end position by adding a marker
-            this.setEndPostion();
+            this.setEndPosition();
             //Stop tracking the users location
             trackRoute = false;
             //show that they did press stop
@@ -358,10 +357,6 @@ public class MyMapFragment extends Fragment
         //Create a LatLng object from our new location
         currentLatLng = new LatLng(currentLatitude, currentLongitude);
 
-        //move the camera to the new position
-        googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
-
         //If the map is not zoomed in at 18 put it there
         if (googleMap.getCameraPosition().zoom != 18)
         {
@@ -396,83 +391,101 @@ public class MyMapFragment extends Fragment
         }
     }
 
+    /**
+     * updateCurrentLocationMarker - change the position of the current position marker to the users
+     * current position.
+     */
     private void updateCurrentLocationMarker()
     {
+        //Create a marker options for the marker
         MarkerOptions options = options = new MarkerOptions()
                 .position(currentLatLng)
                 .title("You are here! ");
+        //Set the marker icon
         options.icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
+        //remove the old location marker.
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
         }
 
+        //add the marker to the map
         myCurrentLocation = googleMap.addMarker(options);
 
+        //move the camera to that marker
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
 
+        //zoom in on the marker
         if (firstLocate)
         {
             googleMap.moveCamera(CameraUpdateFactory.zoomTo(18));
             firstLocate = false;
         }
-        //SoundPlayer.vibrate(500, this.getActivity());
-        //Toast for when we get a new location
-        //Toast.makeText(this.getActivity().getApplicationContext(), "New Location Found",
-        // Toast.LENGTH_SHORT).show();
     }
 
-    private void setStartPostion()
+    /**
+     * setStartPosition - set the start position marker when the user presses record.
+     */
+    private void setStartPosition()
     {
-
-        Toast.makeText(this.getActivity().getApplicationContext(),
-                "Set Start Point",
-                Toast.LENGTH_SHORT).show();
-
+        //If there is already a start position marker remove it.
         if (startPosition != null)
         {
             startPosition.remove();
         }
+        //Remove the current location marker
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
         }
+        //Add a start marker to the current location
         addStartPoint(currentLatLng);
+
         //Add the latlng object to a the linkedlist of points
         points.add(currentLatLng);
         locations.add(currentLocation);
     }
 
+    /**
+     * addStartPoint adds a marker to the users starting position.
+     *
+     * @param currentLatLng the users current position
+     */
     public void addStartPoint(LatLng currentLatLng)
     {
 
+        //Create a marker options for the start marker
         startPostionMarkerOptions = new MarkerOptions()
                 .position(currentLatLng)
                 .title("Start");
+        //set its icon
+
         startPostionMarkerOptions.icon(
                 BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        //Add the marker to the map
         startPosition = googleMap.addMarker(startPostionMarkerOptions);
     }
 
-    private void setEndPostion()
+    /**
+     * setEndPosition - set the end position marker when the user presses stop or save.
+     */
+    private void setEndPosition()
     {
-        Toast.makeText(this.getActivity().getApplicationContext(),
-                "Set End Point",
-                Toast.LENGTH_SHORT).show();
+        //If there is and end position remove it
         if (endPosition != null)
         {
             endPosition.remove();
         }
-
+        //Remove the current location marker
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
         }
-
+        //Add the end point marker to the map
         addEndPoint(currentLatLng);
 
         //Add the latlng object to a the linkedlist of points
@@ -480,14 +493,23 @@ public class MyMapFragment extends Fragment
         locations.add(currentLocation);
     }
 
+    /**
+     * addEndPoint - a marker to the map the end position of the route
+     * @param currentLatLng the users current latlng
+     */
     public void addEndPoint(LatLng currentLatLng)
     {
+        //Create a marker options for the end marker
         endPostionMarkerOptions = new MarkerOptions()
                 .position(currentLatLng)
                 .title("End");
+
+        //set its icon
         endPostionMarkerOptions.icon(
                 BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+        //Add the marker to the map
         endPosition = googleMap.addMarker(endPostionMarkerOptions);
     }
 
@@ -497,18 +519,24 @@ public class MyMapFragment extends Fragment
      */
     public void drawPolyline()
     {
+        //Create a polyline options object
         PolylineOptions po = new PolylineOptions();
+        //Add the points for it to plot along
         po.addAll(points);
-        po.color(Color.CYAN);
+        //Set the color
+        po.color(R.color.polyline_color);
+        //Set the width
         po.width(20.0f);
+        //remove if there already is one
+        if (route != null)
+        {
+            route.remove();
+        }
+        //add the polyline to the map
         route = googleMap.addPolyline(po);
     }
 
-    protected float routeDistance()
-    {
-        return routeDistance;
-    }
-
+    /* Broadcast receiver to catch when the location has changed */
     private BroadcastReceiver receiver = new BroadcastReceiver()
     {
         @Override
@@ -528,34 +556,20 @@ public class MyMapFragment extends Fragment
         }
     };
 
+    /**
+     * loadPoints - sets up a users route that was saved to a file
+     *
+     * @param points - latlng points of the users route
+     */
     public void loadPoints(LinkedList<LatLng> points)
     {
+        //add the start point
         this.addStartPoint(points.getFirst());
+        //add the end point
         this.addEndPoint(points.getLast());
+        //Add the rest of the points
         this.points.addAll(points);
+        //draw the polyline
         this.drawPolyline();
     }
-
-   /* public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        if (currentLocation != null)
-        {
-
-            savedInstanceState.putDouble("CurrentLatitude", currentLocation.getLatitude());
-            savedInstanceState.putDouble("CurrentLongitude", currentLocation.getLongitude());
-        }
-        /*if (startPosition != null)
-        {
-            savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
-            savedInstanceState.putDouble("StartLongitude", currentLocation.getLongitude());
-        }
-        if (st != null)
-        {
-            savedInstanceState.putDouble("StartLatitude", currentLocation.getLatitude());
-            savedInstanceState.putDouble("StartLongitude", currentLocation.getLongitude());
-        }
-        super.onSaveInstanceState(savedInstanceState);
-    }*/
-
-
 }
