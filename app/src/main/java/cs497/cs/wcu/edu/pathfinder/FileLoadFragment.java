@@ -72,7 +72,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
             boolean test = new File(dir.getName(), "routes").mkdir();
             routesDir = this.getActivity().getDir("routes", Context.MODE_PRIVATE);
 
-            this.makeTestFiles();
+            //this.makeTestFiles();
             //Get the files in the directory
             filelist = this.routesDir.listFiles();
             String[] fileNameArray;
@@ -84,7 +84,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
             for (File file : filelist)
             {
                 fileNameArray = file.getName().split("_");
-                Log.v("FILE", Arrays.toString(fileNameArray));
+                Log.v("FILES", Arrays.toString(fileNameArray));
                 if (fileNameArray.length >= 2)
                 {
                     routeName = fileNameArray[0];
@@ -169,7 +169,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         }
     }
 
-    private void makeTestFiles()
+    //private void makeTestFiles()
     {
 
         File file1 = new File(routesDir, "ABCDABCDABCDABCDABCDABCDABCD_4-19-2015_22mi.xml");

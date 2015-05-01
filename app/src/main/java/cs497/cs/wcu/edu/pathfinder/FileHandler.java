@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -34,22 +35,22 @@ public class FileHandler extends Application
     Marker startPosition;
     Marker endPosition;
     LinkedList<LatLng> points;
-    File dir;
+    File routesDir;
+    final Context context;
 
-    public FileHandler(Marker startPosition, Marker endPosition, LinkedList<LatLng> points)
+    public FileHandler(Marker startPosition, Marker endPosition, LinkedList<LatLng> points, Context context)
     {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.points = points;
-        this.dir = this.getApplicationContext().getFilesDir();
+        this.context = context;
+        this.routesDir = context.getDir("routes", Context.MODE_PRIVATE);
     }
 
     public void openNameFileDialog()
     {
         //Create an edit text to get user input from the dialog
-        final EditText input = new EditText(this);
-        //Create a context for the paint fragment so that it can save the file
-        final Context context = this;
+        final EditText input = new EditText(context);
 
         //Build an alert dialog
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
@@ -65,17 +66,16 @@ public class FileHandler extends Application
                         //get the users input
                         String value = "" + input.getText();
                         //If the user did not enter a name save the file as the current date
-
+                        Date date = new Date();
+                        String dateName = new SimpleDateFormat("dd-M-yyyy").format(date).replaceAll(" ", "-");
                         if (value.equals(""))
                         {
-                            Date date = new Date();
-                            //replace spaces with -
-                            value = date.toString().replaceAll(" ", "-");
+                            value += "MyRoute_" + dateName + "_40mi_" + date.toString() + ".xml";
                         }
                         //If the user did not give an extension to the file add the extension to it
-                        if (!value.matches(".*\\.json"))
+                        if (!value.matches(".*\\.xml"))
                         {
-                            value = value + ".json";
+                            value = value + "_" + dateName + "_40mi" + date.toString() + ".xml";
                         }
                         //call save to file and pass it the files name
                         saveToFile(value);
@@ -99,14 +99,14 @@ public class FileHandler extends Application
     {
 
         //Create a file from the filename passed in and the apps directory
-        File fileWithinMyDir = new File(dir, fileName);
+        File fileWithinMyDir = new File(routesDir, fileName);
 
         PrintWriter writer;
         //Try and write the contents of linesJSON to the file
         try
         {
             writer = new PrintWriter(fileWithinMyDir, "UTF-8");
-            writer.println(this.routeToXML());
+            writer.print(this.routeToXML());
             writer.close();
         }
         catch (FileNotFoundException | UnsupportedEncodingException e)

@@ -232,6 +232,7 @@ public class MyMapFragment extends Fragment
             Toast.makeText(this.getActivity().getApplicationContext(), "Stop",
                     Toast.LENGTH_SHORT).show();
             this.setEndPostion();
+            trackRoute = false;
             stopPressed = true;
             record.setVisibility(View.INVISIBLE);
         }
@@ -249,18 +250,10 @@ public class MyMapFragment extends Fragment
         if (!stopPressed)
         {
             stopPress();
-            fileHandler = new FileHandler(startPosition, endPosition, points);
+            fileHandler = new FileHandler(startPosition, endPosition, points, this.getActivity());
             fileHandler.openNameFileDialog();
-
-        }
-        else
-        {
-            Toast.makeText(this.getActivity().getApplicationContext(),
-                    "Start Recording Route First",
-                    Toast.LENGTH_SHORT).show();
         }
     }
-
 
 
     public String routeToXML()
@@ -361,11 +354,6 @@ public class MyMapFragment extends Fragment
     {
         currentLocation = location;
 
-        if (location.hasAccuracy())
-        {
-            Log.d(TAG, "accuracy " + currentLocation.getAccuracy());
-        }
-        //SoundPlayer.vibrate(500, this.getActivity());
         SoundPlayer.makeNotificationSound(this.getActivity());
 
         //Get the current Latitude and Longitude of the location
@@ -391,6 +379,7 @@ public class MyMapFragment extends Fragment
         if (locations.size() >= 1)
         {
             disRecentPoints = currentLocation.distanceTo(locations.getLast());
+
             Toast.makeText(this.getActivity().getApplicationContext(),
                     "Distance: " + disRecentPoints,
                     Toast.LENGTH_SHORT).show();
@@ -401,6 +390,7 @@ public class MyMapFragment extends Fragment
         {
             if (disRecentPoints >= 5.0f && disRecentPoints <= 40.0f)
             {
+                routeDistance += disRecentPoints;
                 points.add(currentLatLng);
                 track++;
             }
@@ -505,16 +495,9 @@ public class MyMapFragment extends Fragment
         route = googleMap.addPolyline(po);
     }
 
-    private float routeDistance()
+    protected float routeDistance()
     {
-        float distance = 0.0f;
-
-        for (int i = 0; i <= locations.size() - 1; i++)
-        {
-            distance += (locations.get(i)).distanceTo((locations.get(i + 1)));
-        }
-
-        return distance;
+        return routeDistance;
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver()
