@@ -32,12 +32,11 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 {
 
     /* A file array of the files in the apps directory*/
-    public File[] filelist;
+    public File[] fileList;
 
     /* The directory of the app*/
     public File dir;
     public File routesDir;
-
 
     /* A list of text to display on our list view */
     private ArrayList<String> fileNames = new ArrayList<>();
@@ -65,20 +64,21 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 
             //Creating an internal dir;
             dir = this.getActivity().getFilesDir();
+
             //make a folder in the applications directory named routes
             boolean test = new File(dir.getName(), "routes").mkdir();
             routesDir = this.getActivity().getDir("routes", Context.MODE_PRIVATE);
 
             //this.makeTestFiles();
             //Get the files in the directory
-            filelist = this.routesDir.listFiles();
+            fileList = this.routesDir.listFiles();
             String[] fileNameArray;
 
             String routeName;
             String routeDate;
             String routeDis;
             //get all the names of files and add them to the theNamesOfFiles array
-            for (File file : filelist)
+            for (File file : fileList)
             {
                 fileNameArray = file.getName().split("_");
                 Log.v("FILES", Arrays.toString(fileNameArray));
@@ -111,22 +111,26 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         return rootView;
     }
 
+    /**
+     * isLocationEnabled - checks if the user has GPS enable if not ask them if they want to
+     */
     private void isLocationEnabled()
     {
         LocationManager lm = null;
         boolean gps_enabled = false;
         boolean network_enabled = false;
         final Context context = this.getActivity();
-        if (lm == null)
-        {
-            lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        }
 
+        lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+        //Get whether they are enabled or not
         gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
+        //check their status if disable open a dialog
         if (!gps_enabled && !network_enabled)
         {
+            //Open a dialog that take the user to the location settings
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setMessage(context.getResources().getString(R.string.gps_network_not_enabled));
             dialog.setPositiveButton(
@@ -155,32 +159,10 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         }
     }
 
-    /*private void makeTestFiles()
-    {
-
-        File file1 = new File(routesDir, "ABCDABCDABCDABCDABCDABCDABCD_4-19-2015_22mi.xml");
-        File file2 = new File(routesDir, "MyRoute2_4-20-2015_12mi.xml");
-        File file3 = new File(routesDir, "MyRoute3_4-21-2015_30mi.xml");
-        File file4 = new File(routesDir, "MyRoute4_4-22-2015_46mi.xml");
-        File file5 = new File(routesDir, "MyRoute5_4-30-2015_53mi.xml");
-        File[] files = new File[]{file1, file2, file3, file4, file5,};
-        PrintWriter writer;
-        for (File file : files)
-        {
-            try
-            {
-                writer = null;
-                writer = new PrintWriter(file, "UTF-8");
-                writer.println("Hello, World");
-                writer.close();
-            }
-            catch (FileNotFoundException | UnsupportedEncodingException e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }*/
-
+    /**
+     * listViewHelper helps do all the work related to setting up and initializing a list view
+     * @param rootView the view of the fragment.
+     */
     private void listViewHelper(View rootView)
     {
         //Set the list view adapters for this view.
@@ -200,17 +182,22 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> l, View view, int position, long id)
     {
-        String fileName = filelist[position].getName();
+        //get the name of the file
+        String fileName = fileList[position].getName();
+
+        //pass it to our file handler
         fileHandler = new FileHandler(this.getActivity(), fileName);
 
-
-        Log.v("PointsXML", fileHandler.loadFile());
-
-
+        //Parse the XML
         AppConstraints.parseXML(fileHandler.loadFile());
+
+        //Load the map fragment
         sendFragChangeBroadcast();
     }
 
+    /**
+     * sendFragChangeBroadcast - sends a broadcast to change the fragment.
+     */
     public void sendFragChangeBroadcast()
     {
         //Send broadcast to Tab Screen to switch the tab
