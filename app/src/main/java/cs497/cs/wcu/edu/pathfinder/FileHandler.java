@@ -131,23 +131,23 @@ public class FileHandler extends Application
 
         sb.append("\t\t<point>\n");
         sb.append("\t\t\t<lat>").append(startPosition.getPosition().latitude).append("</lat>\n");
-        sb.append("\t\t\t<lng>").append(startPosition.getPosition().longitude).append("</lat>\n");
+        sb.append("\t\t\t<lng>").append(startPosition.getPosition().longitude).append("</lng>\n");
         sb.append("\t\t</point>\n");
 
         for (LatLng latLng : points)
         {
             sb.append("\t\t<point>\n");
             sb.append("\t\t\t<lat>").append(latLng.latitude).append("</lat>\n");
-            sb.append("\t\t\t<lng>").append(latLng.longitude).append("</lat>\n");
+            sb.append("\t\t\t<lng>").append(latLng.longitude).append("</lng>\n");
             sb.append("\t\t</point>\n");
         }
 
         sb.append("\t\t<point>\n");
         sb.append("\t\t\t<lat>").append(endPosition.getPosition().latitude).append("</lat>\n");
-        sb.append("\t\t\t<lng>").append(endPosition.getPosition().longitude).append("</lat>\n");
-        sb.append("\t\t<point>\n");
+        sb.append("\t\t\t<lng>").append(endPosition.getPosition().longitude).append("</lng>\n");
+        sb.append("\t\t</point>\n");
 
-        sb.append("\t<points>\n");
+        sb.append("\t</points>\n");
         sb.append("</route>\n");
         return sb.toString();
     }

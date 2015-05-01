@@ -25,48 +25,50 @@ public class AppConstraints extends Application
 
     public static final String PREFS = "cs497.cs.wcu.edu.pathfinder";
 
+    /* Intent Key for zoom */
+    public static final String KEY_TAB = "key_tab";
 
+    /* Intent Key for zoom */
+    public static final String KEY_ZOOM_LEVEL = "zoom level";
 
-    //**Intent Key for zoom**
-    public static final String KEY_TAB ="key_tab";
-
-    //**Intent Key for zoom**
-    public static final String KEY_ZOOM_LEVEL ="zoom level";
-
-    /**Intent key for latitude**/
+    /* Intent key for latitude */
     public static final String KEY_LATITUDE = "LAT";
 
-    /**Intent key for longitude**/
+    /* Intent key for longitude */
     public static final String KEY_LONGITUDE = "LNG";
 
-    /**Intend key for fubar**/
+    /* Intend key for fubar */
     public static final String KEY_FOOBAR = "cs497.cs.wcu.edu.pathfinder.FOOBAR";
 
-    /**A tab change is occouring**/
-    public static final String TAB_BROADCAST ="broadcast_tab";
+    /* A tab change is occouring */
+    public static final String TAB_BROADCAST = "broadcast_tab";
+    public static final String TAB_BROADCAST2 = "broadcast_tab2";
 
-    /**Acts as an intent filter**/
-    public static  final String LOCATION_BROADCAST ="edu.wcu.location_broadcast";
+    /* Acts as an intent filter */
+    public static final String LOCATION_BROADCAST = "edu.wcu.location_broadcast";
 
-    /**A first broadcast**/
-    public static  final String BROADCAST_ONE = "edu.wcu.location_broadcast_one";
+    /* A first broadcast */
+    public static final String BROADCAST_ONE = "edu.wcu.location_broadcast_one";
 
-    /**A second broadcast**/
-    public static  final String BROADCAST_TWO = "edu.wcu.location_broadcast_two";
+    /* A second broadcast */
+    public static final String BROADCAST_TWO = "edu.wcu.location_broadcast_two";
 
-    /**A third broadcast**/
-    public static  final String BROADCAST_THREE = "edu.wcu.location_broadcast_three";
+    /* A third broadcast */
+    public static final String BROADCAST_THREE = "edu.wcu.location_broadcast_three";
 
-    /**A forth broadcast**/
-    public static  final String BROADCAST_FOUR = "edu.wcu.location_broadcast_four";
+    /* A forth broadcast */
+    public static final String BROADCAST_FOUR = "edu.wcu.location_broadcast_four";
     public static final LatLng CULLOWHEE = new LatLng(35.308016, -83.165131);
 
-    public static LinkedList<LatLng> points;
+    public static boolean loadMap = false;
+
+    public static LinkedList<LatLng> points = new LinkedList<>();
 
     private static Context instance;
 
     @Override
-    public void onCreate() {
+    public void onCreate()
+    {
         super.onCreate();
 
         //Maintain an instance of this for static access
@@ -75,10 +77,11 @@ public class AppConstraints extends Application
 
     /**
      * Get the class's instance.
+     *
      * @return The single instance that is maintained as a static field.
      */
-    //==========================================================================
-    public static Context getInstance(){
+    public static Context getInstance()
+    {
         return instance;
     }
 
@@ -127,10 +130,15 @@ public class AppConstraints extends Application
             xmlreader.parse(inStream);
 
             //Get the map markers from the handler.
-            points = handler.getMapMarkers();
-
-            //Toast.makeText(this, mapMarkers.toString(), Toast.LENGTH_SHORT).show();
-
+            /*if (handler == null)
+            {
+                Log.v("PointsXML", "NULL");
+            }*/
+            points.addAll(handler.getMapMarkers());
+            for (LatLng point : points)
+            {
+                Log.v("PointsXML", point.toString());
+            }
         }
         catch (ParserConfigurationException | SAXException | IOException e)
         {
@@ -138,3 +146,4 @@ public class AppConstraints extends Application
         }
     }
 }
+

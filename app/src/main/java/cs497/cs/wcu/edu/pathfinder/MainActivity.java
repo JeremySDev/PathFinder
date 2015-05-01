@@ -222,10 +222,19 @@ public class MainActivity extends ActionBarActivity
             //IF tab broadcast do this.
             if (intent.getAction().equals(AppConstraints.TAB_BROADCAST))
             {
-                fragmentManager.beginTransaction().replace(R.id.container, mapFragment)
-                        .commit();
+                AppConstraints.loadMap = true;
+                fragmentManager.beginTransaction().replace(R.id.container, mapFragment).commit();
+                sendFragChangeBroadcast();
             }
         }
     };
+
+    public void sendFragChangeBroadcast()
+    {
+        //Send broadcast to Tab Screen to switch the tab
+        Intent i = new Intent();
+        i.setAction(AppConstraints.TAB_BROADCAST2);
+        this.sendBroadcast(i);
+    }
 }
 

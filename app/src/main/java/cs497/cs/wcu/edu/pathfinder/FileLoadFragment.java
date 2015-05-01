@@ -200,30 +200,15 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> l, View view, int position, long id)
     {
-        String fileName;
-        /*
-        //get the name of the file
-        for (int i = 0; i < ((ViewGroup) view).getChildCount(); ++i)
-        {
-            TextView nextChild = (TextView) ((ViewGroup) view).getChildAt(i);
-            fileName += nextChild.getText().toString();
-            if (i < 2)
-            {
-                fileName += "_";
-            }
-        }
-        fileName += ".xml";*/
-        fileName = filelist[position].getName();
-
-
+        String fileName = filelist[position].getName();
         fileHandler = new FileHandler(this.getActivity(), fileName);
+
+
+        Log.v("PointsXML", fileHandler.loadFile());
+
 
         AppConstraints.parseXML(fileHandler.loadFile());
         sendFragChangeBroadcast();
-        //Let the user know the file was loaded
-        /*Toast.makeText(this.getActivity().getApplicationContext(), "Loaded: " + fileName,
-                Toast.LENGTH_SHORT).show();*/
-
     }
 
     public void sendFragChangeBroadcast()
@@ -231,57 +216,6 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         //Send broadcast to Tab Screen to switch the tab
         Intent i = new Intent();
         i.setAction(AppConstraints.TAB_BROADCAST);
-        i.putExtra("Points", "sdfsdf");
         this.getActivity().sendBroadcast(i);
-        /*Toast.makeText(this.getActivity().getApplicationContext(), "Broadcast FLF",
-                Toast.LENGTH_SHORT).show();*/
-    }
-
-    /**
-     * readFile - takes in a filename make a file from it reads it in and places its contents in
-     * linesJSON
-     *
-     * @param fileName
-     */
-    public void readFile(String fileName)
-    {
-
-        /*//create a LinkedList JSONObjects
-        LinkedList<JSONObject> linesJSON = new LinkedList<JSONObject>();
-
-        //create a parser and obj
-        JSONParser parser = new JSONParser();
-        Object obj = null;
-        Iterator iterator;
-        //Create a file from the apps directory and the name of the file.
-        File fileWithinMyDir = new File(dir, fileName);
-
-        //Try to parse the JSON file
-        try
-        {
-            obj = parser.parse(new FileReader(fileWithinMyDir));
-        }
-        catch (IOException | ParseException e)
-        {
-            e.printStackTrace();
-        }
-
-        //cast obj to an JSON array
-        JSONArray jsonArray = (JSONArray) obj;
-        //Check if it is null
-        if (jsonArray != null)
-        {
-            //Get an iterator from
-            iterator = jsonArray.iterator();
-
-            //use iterator to get the JSON objects out and add them to linesJSON
-            while (iterator.hasNext())
-            {
-                JSONObject temp = (JSONObject) iterator.next();
-                linesJSON.add(temp);
-            }
-        }
-        //Pass the linked list of lines to appcontext.
-        AppContext.setLineJSON(linesJSON);*/
     }
 }

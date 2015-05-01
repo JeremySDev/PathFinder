@@ -71,6 +71,8 @@ public class MyMapFragment extends Fragment
     boolean runOnce = true;
     boolean firstLocate = true;
     boolean stopPressed = true;
+    boolean recPressed = true;
+
 
     Context context;
 
@@ -153,7 +155,7 @@ public class MyMapFragment extends Fragment
         if (googleMap == null)
         {
             googleMap = fragment.getMap();
-            googleMap.setMyLocationEnabled(true);
+            googleMap.getUiSettings().setZoomGesturesEnabled(false);
         }
 
         /////////////////////////////////////
@@ -164,8 +166,11 @@ public class MyMapFragment extends Fragment
         //filter.addAction(AppConstraints.BROADCAST_TWO);
         //filter.addAction(AppConstraints.BROADCAST_THREE);
         this.getActivity().registerReceiver(receiver, filter);
+        if (AppConstraints.loadMap)
+        {
+            loadPoints(AppConstraints.points);
+        }
     }
-
 
     @Override
     public void onPause()
@@ -215,6 +220,7 @@ public class MyMapFragment extends Fragment
             trackRoute = true;
             this.setStartPostion();
             stopPressed = false;
+            recPressed = true;
             record.setVisibility(View.VISIBLE);
         }
         else
@@ -247,7 +253,7 @@ public class MyMapFragment extends Fragment
     private void savePress()
     {
         FileHandler fileHandler;
-        if (!stopPressed)
+        if (stopPressed || recPressed)
         {
             stopPress();
             fileHandler = new FileHandler(startPosition, endPosition, points, this.getActivity());
@@ -366,9 +372,9 @@ public class MyMapFragment extends Fragment
         googleMap.animateCamera(CameraUpdateFactory.newLatLng(currentLatLng));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
 
-        if (googleMap.getCameraPosition().zoom != 17)
+        if (googleMap.getCameraPosition().zoom != 18)
         {
-            googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+            googleMap.moveCamera(CameraUpdateFactory.zoomTo(18));
             firstLocate = false;
         }
 
@@ -418,7 +424,7 @@ public class MyMapFragment extends Fragment
 
         if (firstLocate)
         {
-            googleMap.moveCamera(CameraUpdateFactory.zoomTo(17));
+            googleMap.moveCamera(CameraUpdateFactory.zoomTo(18));
             firstLocate = false;
         }
         //SoundPlayer.vibrate(500, this.getActivity());
@@ -442,6 +448,14 @@ public class MyMapFragment extends Fragment
         {
             myCurrentLocation.remove();
         }
+        addStartPoint(currentLatLng);
+        //Add the latlng object to a the linkedlist of points
+        points.add(currentLatLng);
+        locations.add(currentLocation);
+    }
+
+    public void addStartPoint(LatLng currentLatLng)
+    {
 
         startPostionMarkerOptions = new MarkerOptions()
                 .position(currentLatLng)
@@ -449,11 +463,7 @@ public class MyMapFragment extends Fragment
         startPostionMarkerOptions.icon(
                 BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-
         startPosition = googleMap.addMarker(startPostionMarkerOptions);
-        //Add the latlng object to a the linkedlist of points
-        points.add(currentLatLng);
-        locations.add(currentLocation);
     }
 
     private void setEndPostion()
@@ -465,22 +475,30 @@ public class MyMapFragment extends Fragment
         {
             endPosition.remove();
         }
+
         if (myCurrentLocation != null)
         {
             myCurrentLocation.remove();
         }
 
+        addEndPoint(currentLatLng);
+
+        //Add the latlng object to a the linkedlist of points
+        points.add(currentLatLng);
+        locations.add(currentLocation);
+    }
+
+    public void addEndPoint(LatLng currentLatLng)
+    {
         endPostionMarkerOptions = new MarkerOptions()
                 .position(currentLatLng)
                 .title("End");
         endPostionMarkerOptions.icon(
                 BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+                        .defaultMarker(BitmapDescriptorFactory.HUE_RED));
         endPosition = googleMap.addMarker(endPostionMarkerOptions);
-        //Add the latlng object to a the linkedlist of points
-        points.add(currentLatLng);
-        locations.add(currentLocation);
     }
+
 
     /**
      * drawPolyline - draws the polyline of the users route
@@ -515,20 +533,17 @@ public class MyMapFragment extends Fragment
                     handleNewLocation(location);
                 }
             }
-            if (action.equals(AppConstraints.TAB_BROADCAST))
-            {
-                //Bundle b = intent.getExtras();
-                Log.v("RECEIVE", "I Received ");
-                loadPoints(AppConstraints.points);
-            }
         }
     };
 
     public void loadPoints(LinkedList<LatLng> points)
     {
-        Toast.makeText(this.getActivity().getApplicationContext(), "Load Points",
-                Toast.LENGTH_SHORT).show();
+        this.addStartPoint(points.getFirst());
+        this.addEndPoint(points.getLast());
+        this.points.addAll(points);
+        this.drawPolyline();
     }
+
    /* public void onSaveInstanceState(Bundle savedInstanceState)
     {
         if (currentLocation != null)
