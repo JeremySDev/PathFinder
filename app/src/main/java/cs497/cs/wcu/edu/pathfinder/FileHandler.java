@@ -4,23 +4,13 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.widget.EditText;
-import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -88,7 +78,8 @@ public class FileHandler extends Application
                         //If the user did not give an extension to the file add the extension to it
                         if (!value.matches(".*\\.xml"))
                         {
-                            value = value + "_" + dateName + "_40mi" + date.toString() + ".xml";
+                            String temp = date.toString().replaceAll(" ", "-");
+                            value = value + "_" + dateName + "_40mi_" + temp + ".xml";
                         }
                         //call save to file and pass it the files name
                         saveToFile(value);
@@ -157,7 +148,7 @@ public class FileHandler extends Application
         return sb.toString();
     }
 
-    public LinkedList<LatLng> loadFile()
+    public String loadFile()
     {
         Scanner scanner;
         StringBuilder stringBuilder = new StringBuilder();
@@ -175,39 +166,7 @@ public class FileHandler extends Application
         }
 
         String rawXML = stringBuilder.toString();
-        return this.parseXML(rawXML);
+        return rawXML;
     }
 
-    public LinkedList<LatLng> parseXML(String rawXML)
-    {
-        Log.w("AndroidParseXMLActivity", "Start Parsing");
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        try
-        {
-            SAXParser saxParser = factory.newSAXParser();
-            XMLReader xmlreader = saxParser.getXMLReader();
-
-            MarkerXMLHandler handler = new MarkerXMLHandler();
-            xmlreader.setContentHandler(handler);
-
-            //Objects to read the stream.
-            InputSource inStream = new InputSource();
-            inStream.setCharacterStream(new StringReader(rawXML));
-
-            //Parse the input stream
-            xmlreader.parse(inStream);
-
-            //Get the map markers from the handler.
-            return handler.getMapMarkers();
-
-            //Toast.makeText(this, mapMarkers.toString(), Toast.LENGTH_SHORT).show();
-
-        }
-        catch (ParserConfigurationException | SAXException | IOException e)
-        {
-            Toast.makeText(this, "Error reading xml file.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

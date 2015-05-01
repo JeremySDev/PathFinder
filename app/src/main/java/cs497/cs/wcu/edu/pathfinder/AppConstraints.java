@@ -4,8 +4,17 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.LinkedList;
 
 /**
  * @author Jeremy Stilwell
@@ -15,6 +24,8 @@ public class AppConstraints extends Application
 {
 
     public static final String PREFS = "cs497.cs.wcu.edu.pathfinder";
+
+
 
     //**Intent Key for zoom**
     public static final String KEY_TAB ="key_tab";
@@ -49,6 +60,8 @@ public class AppConstraints extends Application
     /**A forth broadcast**/
     public static  final String BROADCAST_FOUR = "edu.wcu.location_broadcast_four";
     public static final LatLng CULLOWHEE = new LatLng(35.308016, -83.165131);
+
+    public static LinkedList<LatLng> points;
 
     private static Context instance;
 
@@ -92,5 +105,36 @@ public class AppConstraints extends Application
         dirEmpty = filesInDir.length == 0;
         //Return
         return dirEmpty;
+    }
+
+    public static void parseXML(String rawXML)
+    {
+        Log.w("AndroidParseXMLActivity", "Start Parsing");
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        try
+        {
+            SAXParser saxParser = factory.newSAXParser();
+            XMLReader xmlreader = saxParser.getXMLReader();
+
+            MarkerXMLHandler handler = new MarkerXMLHandler();
+            xmlreader.setContentHandler(handler);
+
+            //Objects to read the stream.
+            InputSource inStream = new InputSource();
+            inStream.setCharacterStream(new StringReader(rawXML));
+
+            //Parse the input stream
+            xmlreader.parse(inStream);
+
+            //Get the map markers from the handler.
+            points = handler.getMapMarkers();
+
+            //Toast.makeText(this, mapMarkers.toString(), Toast.LENGTH_SHORT).show();
+
+        }
+        catch (ParserConfigurationException | SAXException | IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

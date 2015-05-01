@@ -140,7 +140,7 @@ public class LocationProvider extends Service implements LocationListener
                 }//end if
 
             }//end for
-            else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
+            /*else if (intent.getAction().equals(AppConstraints.BROADCAST_TWO))
             {
                 if (intent.getExtras() != null)
                 {
@@ -163,7 +163,7 @@ public class LocationProvider extends Service implements LocationListener
                     //myMapFragment.goToLocation(lat, lng, zoom);
 
                 }
-            }
+            }*/
         }
     };
 }

@@ -19,12 +19,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 
 /**
  * FileLoadFragment - this fragment is responsible for displaying a list view of saved files and
@@ -206,6 +204,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     {
         String fileName = "";
 
+        //get the name of the file
         for (int i = 0; i < ((ViewGroup) view).getChildCount(); ++i)
         {
             TextView nextChild = (TextView) ((ViewGroup) view).getChildAt(i);
@@ -217,13 +216,10 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         }
         fileName += ".xml";
 
+
         fileHandler = new FileHandler(this.getActivity(), fileName);
-        //get the name of the file
-        //String fileName = ((TextView) view).getText().toString();
 
-        //pass the name to readFile
-
-        sendFragChangeBroadcast(fileHandler.loadFile());
+        AppConstraints.parseXML(fileHandler.loadFile());
 
         //Let the user know the file was loaded
         Toast.makeText(this.getActivity().getApplicationContext(), "Loaded: " + fileName,
@@ -231,13 +227,15 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
 
     }
 
-    public void sendFragChangeBroadcast(LinkedList<LatLng> latLngs)
+    public void sendFragChangeBroadcast()
     {
         //Send broadcast to Tab Screen to switch the tab
         Intent i = new Intent();
         i.setAction(AppConstraints.TAB_BROADCAST);
-        i.putExtra("Points", latLngs);
+        //i.putExtra("Points", latLngs);
         this.getActivity().sendBroadcast(i);
+        Toast.makeText(this.getActivity().getApplicationContext(), "Broadcast FLF",
+                Toast.LENGTH_SHORT).show();
     }
 
     /**

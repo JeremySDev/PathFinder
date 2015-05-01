@@ -516,7 +516,7 @@ public class MyMapFragment extends Fragment
                     handleNewLocation(location);
                 }
             }
-            if (action.equals(AppConstraints.TAB_BROADCAST))
+            /*if (action.equals(AppConstraints.TAB_BROADCAST))
             {
                 if (intent.getExtras() != null)
                 {
@@ -524,7 +524,7 @@ public class MyMapFragment extends Fragment
                     //LinkedList<> points = (LinkedList<>) b.get("Points");
                     //handleNewLocation(location);
                 }
-            }
+            }*/
         }
     };
 
