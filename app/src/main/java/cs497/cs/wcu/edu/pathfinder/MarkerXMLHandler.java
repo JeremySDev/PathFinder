@@ -1,12 +1,14 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * @author Jeremy Stilwell
@@ -14,6 +16,13 @@ import java.util.ArrayList;
  */
 public class MarkerXMLHandler extends DefaultHandler
 {
+    private Marker startPosition;
+    private Marker endPosition;
+
+    private MarkerOptions startPostionMarkerOptions;
+    private MarkerOptions endPostionMarkerOptions;
+
+    private LinkedList<LatLng> points = new LinkedList<>();
 
     /**
      * A global list of map markers*
@@ -23,7 +32,7 @@ public class MarkerXMLHandler extends DefaultHandler
     /**
      * A temp map marker built to get each marker element*
      */
-    MarkerOptions temp;
+    LatLng temp;
 
     /**
      * A temporary lat lng*
@@ -50,56 +59,44 @@ public class MarkerXMLHandler extends DefaultHandler
      */
     String tmpLng = "";
 
-    //=========================================================================
 
     /**
      * Handle XML and store the result in the arrayList.
      */
-    //=========================================================================
     public MarkerXMLHandler()
     {
-
-        mapMarkers = new ArrayList<MarkerOptions>();
-
-    }//========================================================================
-
-    //=========================================================================
+        points = new LinkedList<>();
+    }
 
     /**
      * Return the array list of completed map markers.
      *
      * @return
      */
-    //=========================================================================
-    public ArrayList<MarkerOptions> getMapMarkers()
+    public LinkedList<LatLng> getMapMarkers()
     {
-        return mapMarkers;
-    }//========================================================================
+        return points;
+    }
 
-    //=========================================================================
+    public Marker[] getStartEndMarkers()
+    {
+        return new Marker[]{startPosition, endPosition};
+    }
+
 
     /**
      * @param uri        The xml name space uri
      * @param localName  The name of the xml tag opening i.e. marker
      * @param qName      The fully qualified name of the tag opening i.e. xs:marker.
      * @param attributes Any attributes that happen to be with the tag.
-     * @throws org.xml.sax.SAXException SAXException Any SaxException, possibly wrapping another exception
+     * @throws org.xml.sax.SAXException SAXException Any SaxException,
+     *                                  possibly wrapping another exception
      */
-    //=========================================================================
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes)
             throws SAXException
     {
-
-        if (qName.equals("marker"))
-        {//When marker found new tag is reached.
-            temp = new MarkerOptions();
-        }
-        else if (qName.equals("title"))
-        {
-            currentElement = tmpTitle;
-        }
-        else if (qName.equals("lng"))
+        if (qName.equals("lng"))
         {
             currentElement = tmpLng;
         }
@@ -112,9 +109,7 @@ public class MarkerXMLHandler extends DefaultHandler
             currentElement = null;
         }
 
-    }//end startElement========================================================
-
-    //=========================================================================
+    }
 
     /**
      * When closing tag is reached.
@@ -122,48 +117,32 @@ public class MarkerXMLHandler extends DefaultHandler
      * @param uri
      * @param localName The name of the closing tag i.e. lat
      * @param qName     The fully qualified name of the closing tag i.e. xs:lat
-     * @throws org.xml.sax.SAXException SAXException Any SaxException, possibly wrapping another exception
+     * @throws org.xml.sax.SAXException SAXException Any SaxException,
+     *                                  possibly wrapping another exception
      */
-    //=========================================================================
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException
     {
 
-        //Create if needed.
-        if (temp == null)
-        {
-            temp = new MarkerOptions();
-        }
-
-        /** set value */
-        if (qName.equals("title"))
-        {//when title is found close
-            temp.title(currentElement);
-        }
-        else if (qName.equals("lng"))
+        if (qName.equals("lng"))
         {
             tmpLngN = Double.parseDouble(currentElement);
-
         }
         else if (qName.equals("lat"))
         {
-
             tmpLatN = Double.parseDouble(currentElement);
         }
 
-        if (qName.equals("marker"))
-        {//When marker is found  again the marker is complete
-            temp.position(new LatLng(tmpLatN, tmpLngN));
-
-            mapMarkers.add(temp);
+        if (qName.equals("point"))
+        {
+            temp = new LatLng(tmpLatN, tmpLngN);
+            points.add(temp);
             temp = null;
         }
 
         currentElement = null;
-    }//========================================================================
-
-    //=========================================================================
+    }
 
     /**
      * Read the characters in.
@@ -173,7 +152,6 @@ public class MarkerXMLHandler extends DefaultHandler
      * @param length The number of characters to use from the array.
      * @throws org.xml.sax.SAXException Any SaxException, possibly wrapping another exception.
      */
-    //=========================================================================
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException
     {
@@ -182,6 +160,5 @@ public class MarkerXMLHandler extends DefaultHandler
         {
             currentElement = currentElement + new String(ch, start, length);
         }
-    }//=========================================================================
-
-}//end class####################################################################
+    }
+}

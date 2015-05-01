@@ -18,12 +18,14 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 /**
  * @author Jeremy Stilwell
@@ -36,9 +38,18 @@ public class FileHandler extends Application
     Marker endPosition;
     LinkedList<LatLng> points;
     File routesDir;
+    File fileToLoad;
     final Context context;
 
-    public FileHandler(Marker startPosition, Marker endPosition, LinkedList<LatLng> points, Context context)
+    public FileHandler(Context context, String fileName)
+    {
+        this.context = context;
+        this.routesDir = context.getDir("routes", Context.MODE_PRIVATE);
+        this.fileToLoad = new File(routesDir, fileName);
+    }
+
+    public FileHandler(Marker startPosition, Marker endPosition, LinkedList<LatLng> points,
+                       Context context)
     {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
@@ -46,6 +57,7 @@ public class FileHandler extends Application
         this.context = context;
         this.routesDir = context.getDir("routes", Context.MODE_PRIVATE);
     }
+
 
     public void openNameFileDialog()
     {
@@ -67,7 +79,8 @@ public class FileHandler extends Application
                         String value = "" + input.getText();
                         //If the user did not enter a name save the file as the current date
                         Date date = new Date();
-                        String dateName = new SimpleDateFormat("dd-M-yyyy").format(date).replaceAll(" ", "-");
+                        String dateName =
+                                new SimpleDateFormat("dd-M-yyyy").format(date).replaceAll(" ", "-");
                         if (value.equals(""))
                         {
                             value += "MyRoute_" + dateName + "_40mi_" + date.toString() + ".xml";
@@ -119,33 +132,53 @@ public class FileHandler extends Application
     {
         StringBuilder sb = new StringBuilder("");
         sb.append("<route>\n");
-
-        sb.append("\t<startmarker>\n");
-        sb.append("\t\t<title>" + startPosition.getTitle() + "</title>\n");
-        sb.append("\t\t<lat>" + startPosition.getPosition().latitude + "</lat>\n");
-        sb.append("\t\t<lng>" + startPosition.getPosition().longitude + "</lat>\n");
-        sb.append("\t</startmarker>\n");
-
-        sb.append("\t<endmarker>\n");
-        sb.append("\t\t<title>" + endPosition.getTitle() + "</title>\n");
-        sb.append("\t\t<lat>" + endPosition.getPosition().latitude + "</lat>\n");
-        sb.append("\t\t<lng>" + endPosition.getPosition().longitude + "</lat>\n");
-        sb.append("\t</endmarker>\n");
-
         sb.append("\t <points>\n");
+
+        sb.append("\t\t<point>\n");
+        sb.append("\t\t\t<lat>").append(startPosition.getPosition().latitude).append("</lat>\n");
+        sb.append("\t\t\t<lng>").append(startPosition.getPosition().longitude).append("</lat>\n");
+        sb.append("\t\t</point>\n");
+
         for (LatLng latLng : points)
         {
             sb.append("\t\t<point>\n");
-            sb.append("\t\t\t<lat>" + latLng.latitude + "</lat>\n");
-            sb.append("\t\t\t<lng>" + latLng.longitude + "</lat>\n");
+            sb.append("\t\t\t<lat>").append(latLng.latitude).append("</lat>\n");
+            sb.append("\t\t\t<lng>").append(latLng.longitude).append("</lat>\n");
             sb.append("\t\t</point>\n");
-        }//end for
+        }
+
+        sb.append("\t\t<point>\n");
+        sb.append("\t\t\t<lat>").append(endPosition.getPosition().latitude).append("</lat>\n");
+        sb.append("\t\t\t<lng>").append(endPosition.getPosition().longitude).append("</lat>\n");
+        sb.append("\t\t<point>\n");
+
         sb.append("\t<points>\n");
         sb.append("</route>\n");
         return sb.toString();
     }
 
-    public void parseXML(String rawXML)
+    public LinkedList<LatLng> loadFile()
+    {
+        Scanner scanner;
+        StringBuilder stringBuilder = new StringBuilder();
+        try
+        {
+            scanner = new Scanner(fileToLoad);
+            while (scanner.hasNext())
+            {
+                stringBuilder.append(scanner.next());
+            }
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
+        String rawXML = stringBuilder.toString();
+        return this.parseXML(rawXML);
+    }
+
+    public LinkedList<LatLng> parseXML(String rawXML)
     {
         Log.w("AndroidParseXMLActivity", "Start Parsing");
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -153,21 +186,28 @@ public class FileHandler extends Application
         {
             SAXParser saxParser = factory.newSAXParser();
             XMLReader xmlreader = saxParser.getXMLReader();
+
             MarkerXMLHandler handler = new MarkerXMLHandler();
             xmlreader.setContentHandler(handler);
-            //myData = handler.getObjectList();
+
             //Objects to read the stream.
             InputSource inStream = new InputSource();
             inStream.setCharacterStream(new StringReader(rawXML));
+
             //Parse the input stream
-            //xmlreader.parse(inStream);
+            xmlreader.parse(inStream);
+
             //Get the map markers from the handler.
-            //mapMarkers = handler.getMapMarkers();
+            return handler.getMapMarkers();
+
+            //Toast.makeText(this, mapMarkers.toString(), Toast.LENGTH_SHORT).show();
+
         }
-        catch (ParserConfigurationException | SAXException e)
+        catch (ParserConfigurationException | SAXException | IOException e)
         {
             Toast.makeText(this, "Error reading xml file.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
+        return null;
     }
 }

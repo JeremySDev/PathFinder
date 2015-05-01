@@ -19,13 +19,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  * FileLoadFragment - this fragment is responsible for displaying a list view of saved files and
@@ -50,6 +49,8 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     private ArrayList<String> datesOfRoutes = new ArrayList<>();
 
     private ArrayList<String> distances = new ArrayList<>();
+
+    FileHandler fileHandler;
 
     /**
      * Called to create the fragment view.
@@ -124,20 +125,9 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         {
             lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         }
-        try
-        {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        }
-        catch (Exception ex)
-        {
-        }
-        try
-        {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        }
-        catch (Exception ex)
-        {
-        }
+
+        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
         if (!gps_enabled && !network_enabled)
         {
@@ -169,7 +159,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         }
     }
 
-    //private void makeTestFiles()
+    /*private void makeTestFiles()
     {
 
         File file1 = new File(routesDir, "ABCDABCDABCDABCDABCDABCDABCD_4-19-2015_22mi.xml");
@@ -193,7 +183,7 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     private void listViewHelper(View rootView)
     {
@@ -214,16 +204,40 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> l, View view, int position, long id)
     {
+        String fileName = "";
+
+        for (int i = 0; i < ((ViewGroup) view).getChildCount(); ++i)
+        {
+            TextView nextChild = (TextView) ((ViewGroup) view).getChildAt(i);
+            fileName += nextChild.getText().toString();
+            if (i < 2)
+            {
+                fileName += "_";
+            }
+        }
+        fileName += ".xml";
+
+        fileHandler = new FileHandler(this.getActivity(), fileName);
         //get the name of the file
-        String fileName = ((TextView) view).getText().toString();
+        //String fileName = ((TextView) view).getText().toString();
 
         //pass the name to readFile
-        this.readFile(fileName);
+
+        sendFragChangeBroadcast(fileHandler.loadFile());
 
         //Let the user know the file was loaded
         Toast.makeText(this.getActivity().getApplicationContext(), "Loaded: " + fileName,
                 Toast.LENGTH_SHORT).show();
 
+    }
+
+    public void sendFragChangeBroadcast(LinkedList<LatLng> latLngs)
+    {
+        //Send broadcast to Tab Screen to switch the tab
+        Intent i = new Intent();
+        i.setAction(AppConstraints.TAB_BROADCAST);
+        i.putExtra("Points", latLngs);
+        this.getActivity().sendBroadcast(i);
     }
 
     /**

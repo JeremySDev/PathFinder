@@ -516,6 +516,15 @@ public class MyMapFragment extends Fragment
                     handleNewLocation(location);
                 }
             }
+            if (action.equals(AppConstraints.TAB_BROADCAST))
+            {
+                if (intent.getExtras() != null)
+                {
+                    Bundle b = intent.getExtras();
+                    //LinkedList<> points = (LinkedList<>) b.get("Points");
+                    //handleNewLocation(location);
+                }
+            }
         }
     };
 

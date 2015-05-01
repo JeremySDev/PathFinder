@@ -1,7 +1,10 @@
 package cs497.cs.wcu.edu.pathfinder;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.io.File;
 
@@ -58,10 +60,27 @@ public class MainActivity extends ActionBarActivity
         dirEmpty = AppConstraints.isDirEmpty(this.getApplicationContext());
 
 
-
     }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        //////////////////////////////////////////
+        //REGISTERING THE BROADCAST RECEIVER
+        ////////////////////////////////////////
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(AppConstraints.TAB_BROADCAST);
+        this.registerReceiver(tab_receiver, filter);
+    }
 
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        this.unregisterReceiver(tab_receiver);
+
+    }
 
     @Override
     public void onNavigationDrawerItemSelected(int position)
@@ -187,6 +206,32 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
+
+
+    /**
+     * An inner class to handle receive broadcasts
+     */
+    private BroadcastReceiver tab_receiver = new BroadcastReceiver()
+    {
+        /** Receives broadcast messages from the system. */
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+
+
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment mapFragment = new MyMapFragment();
+            //IF tab broadcast do this.
+            if (intent.getAction().equals(AppConstraints.TAB_BROADCAST))
+            {
+                if (intent.getExtras() != null)
+                {
+                    fragmentManager.beginTransaction().replace(R.id.container, mapFragment)
+                            .commit();
+                }
+            }
+        }
+    };
 
 }
 
