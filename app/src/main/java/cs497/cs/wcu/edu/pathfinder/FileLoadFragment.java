@@ -17,8 +17,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -202,8 +200,8 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
     @Override
     public void onItemClick(AdapterView<?> l, View view, int position, long id)
     {
-        String fileName = "";
-
+        String fileName;
+        /*
         //get the name of the file
         for (int i = 0; i < ((ViewGroup) view).getChildCount(); ++i)
         {
@@ -214,16 +212,17 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
                 fileName += "_";
             }
         }
-        fileName += ".xml";
+        fileName += ".xml";*/
+        fileName = filelist[position].getName();
 
 
         fileHandler = new FileHandler(this.getActivity(), fileName);
 
         AppConstraints.parseXML(fileHandler.loadFile());
-
+        sendFragChangeBroadcast();
         //Let the user know the file was loaded
-        Toast.makeText(this.getActivity().getApplicationContext(), "Loaded: " + fileName,
-                Toast.LENGTH_SHORT).show();
+        /*Toast.makeText(this.getActivity().getApplicationContext(), "Loaded: " + fileName,
+                Toast.LENGTH_SHORT).show();*/
 
     }
 
@@ -232,10 +231,10 @@ public class FileLoadFragment extends Fragment implements OnItemClickListener
         //Send broadcast to Tab Screen to switch the tab
         Intent i = new Intent();
         i.setAction(AppConstraints.TAB_BROADCAST);
-        //i.putExtra("Points", latLngs);
+        i.putExtra("Points", "sdfsdf");
         this.getActivity().sendBroadcast(i);
-        Toast.makeText(this.getActivity().getApplicationContext(), "Broadcast FLF",
-                Toast.LENGTH_SHORT).show();
+        /*Toast.makeText(this.getActivity().getApplicationContext(), "Broadcast FLF",
+                Toast.LENGTH_SHORT).show();*/
     }
 
     /**

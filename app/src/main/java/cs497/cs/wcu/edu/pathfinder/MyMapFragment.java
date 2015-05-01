@@ -381,8 +381,7 @@ public class MyMapFragment extends Fragment
             disRecentPoints = currentLocation.distanceTo(locations.getLast());
 
             Toast.makeText(this.getActivity().getApplicationContext(),
-                    "Distance: " + disRecentPoints,
-                    Toast.LENGTH_SHORT).show();
+                    "Distance: " + disRecentPoints, Toast.LENGTH_SHORT).show();
         }
 
         //Start location
@@ -506,7 +505,7 @@ public class MyMapFragment extends Fragment
         public void onReceive(Context context, Intent intent)
         {
             String action = intent.getAction();
-            Log.v("RECEIVE", "I Received " + action);
+
             if (action.equals(AppConstraints.LOCATION_BROADCAST))
             {
                 if (intent.getExtras() != null)
@@ -516,19 +515,20 @@ public class MyMapFragment extends Fragment
                     handleNewLocation(location);
                 }
             }
-            /*if (action.equals(AppConstraints.TAB_BROADCAST))
+            if (action.equals(AppConstraints.TAB_BROADCAST))
             {
-                if (intent.getExtras() != null)
-                {
-                    Bundle b = intent.getExtras();
-                    //LinkedList<> points = (LinkedList<>) b.get("Points");
-                    //handleNewLocation(location);
-                }
-            }*/
+                //Bundle b = intent.getExtras();
+                Log.v("RECEIVE", "I Received ");
+                loadPoints(AppConstraints.points);
+            }
         }
     };
 
-
+    public void loadPoints(LinkedList<LatLng> points)
+    {
+        Toast.makeText(this.getActivity().getApplicationContext(), "Load Points",
+                Toast.LENGTH_SHORT).show();
+    }
    /* public void onSaveInstanceState(Bundle savedInstanceState)
     {
         if (currentLocation != null)

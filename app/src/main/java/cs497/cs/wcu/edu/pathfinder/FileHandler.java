@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.EditText;
+import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
@@ -69,19 +70,22 @@ public class FileHandler extends Application
                         String value = "" + input.getText();
                         //If the user did not enter a name save the file as the current date
                         Date date = new Date();
+                        String temp = date.toString().replaceAll(" ", "-");
                         String dateName =
                                 new SimpleDateFormat("dd-M-yyyy").format(date).replaceAll(" ", "-");
                         if (value.equals(""))
                         {
-                            value += "MyRoute_" + dateName + "_40mi_" + date.toString() + ".xml";
+                            value += "MyRoute_" + dateName + "_40mi" + /*temp +*/ ".xml";
                         }
                         //If the user did not give an extension to the file add the extension to it
                         if (!value.matches(".*\\.xml"))
                         {
-                            String temp = date.toString().replaceAll(" ", "-");
-                            value = value + "_" + dateName + "_40mi_" + temp + ".xml";
+
+                            value = value + "_" + dateName + "_40mi" + /*temp +*/ ".xml";
+
                         }
                         //call save to file and pass it the files name
+                        Toast.makeText(context, value, Toast.LENGTH_SHORT).show();
                         saveToFile(value);
                     }
                 });

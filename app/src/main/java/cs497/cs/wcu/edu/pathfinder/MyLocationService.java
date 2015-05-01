@@ -41,7 +41,7 @@ public class MyLocationService extends Service implements LocationListener
         // 5 miliseconds
         int minTime = 5000;
         // 10 meters
-        int minDist = 10;
+        int minDist = 1;
 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDist, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDist, this);
@@ -166,11 +166,11 @@ public class MyLocationService extends Service implements LocationListener
             intent.putExtra("Provider", loc.getProvider());
             intent.putExtra("Location", loc);
             sendBroadcast(intent);
-            if ((i % 5) == 0)
+            /*if ((i % 5) == 0)
             {
                 Toast.makeText(getApplicationContext(), "Broadcast: " + i, Toast.LENGTH_SHORT)
                         .show();
-            }
+            }*/
             i++;
         }
     }

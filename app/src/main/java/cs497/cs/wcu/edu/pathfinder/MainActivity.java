@@ -217,21 +217,15 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onReceive(Context context, Intent intent)
         {
-
-
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment mapFragment = new MyMapFragment();
             //IF tab broadcast do this.
             if (intent.getAction().equals(AppConstraints.TAB_BROADCAST))
             {
-                if (intent.getExtras() != null)
-                {
-                    fragmentManager.beginTransaction().replace(R.id.container, mapFragment)
-                            .commit();
-                }
+                fragmentManager.beginTransaction().replace(R.id.container, mapFragment)
+                        .commit();
             }
         }
     };
-
 }
 
