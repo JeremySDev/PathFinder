@@ -98,6 +98,11 @@ public class MyMapFragment extends Fragment
     /* Whether or not record has been pressed */
     private boolean runOnce = false;
 
+    private static final int RED = 0;
+    private static final int GREEN = 179;
+    private static final int BLUE = 253;
+
+
 
     /**
      * Does the initial creation of the fragment*
@@ -527,7 +532,7 @@ public class MyMapFragment extends Fragment
         //Add the points for it to plot along
         po.addAll(points);
         //Set the color
-        po.color(Color.GREEN);
+        po.color(Color.rgb(RED, GREEN, BLUE));
         //Set the width
         po.width(20.0f);
         //remove if there already is one
