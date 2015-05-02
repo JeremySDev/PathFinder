@@ -152,7 +152,7 @@ public class MyLocationService extends Service implements LocationListener
             intent.putExtra("Provider", loc.getProvider());
             intent.putExtra("Location", loc);
             sendBroadcast(intent);
-            SoundPlayer.makeNotificationSound(this);
+            //SoundPlayer.makeNotificationSound(this);
         }
     }
 

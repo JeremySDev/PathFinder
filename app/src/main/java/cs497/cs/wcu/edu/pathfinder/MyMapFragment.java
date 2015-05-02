@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -526,7 +527,7 @@ public class MyMapFragment extends Fragment
         //Add the points for it to plot along
         po.addAll(points);
         //Set the color
-        po.color(R.color.polyline_color);
+        po.color(Color.GREEN);
         //Set the width
         po.width(20.0f);
         //remove if there already is one
